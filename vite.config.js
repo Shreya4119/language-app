@@ -23,6 +23,7 @@ export const SOURCES = [
   'notes.js',
   'nudges.js',     /* needs VOCAB, UNITS, dueWords() and handPending() */
   'games.js',      /* needs VOCAB, course(), wordResult(), note(), navBar() */
+  'daily.js',      /* the Home hero: assembles today from what already exists */
   'screens4.js',
 ];
 

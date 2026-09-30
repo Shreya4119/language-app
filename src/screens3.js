@@ -55,7 +55,7 @@ SCREENS.story = (sid) => {
 function storyQ(sid){
   const st = STORIES.find(x=>x.id===sid), stst = S.stories[sid];
   if(stst.qi >= st.qs.length){
-    stst.score = Math.round(stst.ok/st.qs.length*100); save(); bumpStreak();
+    stst.score = Math.round(stst.ok/st.qs.length*100); save(); bumpStreak(); dailyMark('input');
     toast(`Story done · ${stst.ok}/${st.qs.length} ✓`);
     return go('stories');
   }
@@ -121,18 +121,37 @@ function wrSubmit(){
 }
 
 /* ================= SPEAKING ================= */
+/* The self-introduction drill. It used to read MOCKTEST.sprechen directly,
+   which is the German exam, so a Dutch learner was handed "Ich heiße" to
+   practise. The prompts now come from the exam when the course has one, and
+   otherwise from the learner's own introduction in Lesson 1, which every
+   course has. Sentences are theirs, in their language, with their name. */
+function speakingDrill(){
+  const ex = hasMock() && MOCKTEST.sprechen;
+  const mine = (typeof l1Lines === 'function') ? l1Lines() : [];
+  const lines = mine.length ? mine.map(l=>l.de)
+    : (ex && ex.model ? ex.model.split(' / ') : []);
+  return {
+    intro: ex ? ex.intro : `Say your introduction out loud, the whole way through, without reading ahead. This is the first thing anyone will ask you.`,
+    cards: ex ? ex.cards : (course().first && course().first.lines || [])
+      .map(L => L.ph || L.blank || (L.gender ? 'man / woman' : '')).filter(Boolean),
+    lines
+  };
+}
 SCREENS.speaking = () => {
-  const t = MOCKTEST.sprechen;
+  dailyMark('say');
+  const t = speakingDrill();
+  const sk = (course().skillNames || {}).speaking || 'Speaking';
   app.innerHTML = `<div class="screen">
- <div class="topbar"><button class="x" onclick="go('skills')">←</button><div class="grow center"><b>Sprechen · Sich vorstellen</b></div><span class="counter"></span></div>
+ <div class="topbar"><button class="x" onclick="go('skills')">←</button><div class="grow center"><b>${esc(sk)}</b></div><span class="counter"></span></div>
  <div class="card" style="background:var(--tint);border:none;box-shadow:none"><p style="font-size:13.5px;line-height:1.55">${esc(t.intro)}</p></div>
- <div class="sec">Your cards, answer each out loud</div>
- <div class="wrap" style="margin-bottom:12px">${t.cards.map(c=>`<div class="chip" style="cursor:default">${esc(c)}</div>`).join('')}</div>
- <div class="card"><b style="font-size:13px">Sentence frames (tap to hear):</b>
-      ${t.model.split(' / ').map(m=>`<div class="row" style="margin-top:8px"><button class="speak" style="width:34px;height:34px;min-width:34px;font-size:12px" onclick="speak('${esc(m).replace(/'/g,"\\'").replace(/…/g,'')}')">▶</button><span style="font-size:13.5px">${esc(m)}</span></div>`).join('')}
-</div>
+    ${t.cards.length ? `<div class="sec">Your cards, answer each out loud</div>
+ <div class="wrap" style="margin-bottom:12px">${t.cards.map(c=>`<div class="chip" style="cursor:default">${esc(c)}</div>`).join('')}</div>` : ''}
+    ${t.lines.length ? `<div class="card"><b style="font-size:13px">Your sentences (tap to hear):</b>
+      ${t.lines.map(m=>`<div class="row" style="margin-top:8px"><button class="speak" style="width:34px;height:34px;min-width:34px;font-size:12px" onclick="speak('${esc(m).replace(/'/g,"\\'").replace(/…/g,'')}')">▶</button><span style="font-size:13.5px">${esc(m)}</span></div>`).join('')}
+</div>` : `<div class="card"><p style="font-size:13.5px;line-height:1.55">Finish your first lesson and your own introduction appears here, in your words.</p></div>`}
  <div class="grow" style="min-height:12px"></div>
- <button class="btn" onclick="S.speakDone=true;save();bumpStreak();toast('Gut gemacht! Say it again tomorrow, faster.');go('skills')">I said it all out loud ✓</button>
+ <button class="btn" onclick="S.speakDone=true;save();bumpStreak();toast('Well said. Again tomorrow, a little faster.');go('skills')">I said it all out loud ✓</button>
   ${navBar('skills')}</div>`;
 };
 
@@ -206,6 +225,7 @@ function scFinish(){
 
 /* ================= CULTURE ================= */
 SCREENS.culture = () => {
+  dailyMark('input');
   app.innerHTML = `<div class="screen">
  <div class="topbar"><button class="x" onclick="go('home')">←</button><div class="grow center"><b>🧭 Culture corner</b></div><span class="counter"></span></div>
  <p class="sub" style="margin:-4px 0 12px">A small cultural heads-up, the must-know things before (and after) you arrive in a new country. Nobody tells you these; ${TN()} does.</p>

@@ -205,3 +205,17 @@ textarea{min-height:130px;resize:vertical;line-height:1.55}
 .gameOpt.right{background:var(--good);border-color:var(--good);color:#fff}
 .gameOpt.wrong{background:var(--bad);border-color:var(--bad);color:#fff}
 .gameOpt.dim{opacity:.4}
+
+/* ---- daily task ---- */
+.dailyBar{display:flex;gap:5px;margin-bottom:11px}
+.dailyBar i{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.28)}
+.dailyBar i.on{background:var(--hero-ink)}
+.dailyList{display:flex;flex-direction:column;gap:6px}
+.dailyRow{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.14);border-radius:12px;padding:9px 11px;cursor:pointer}
+.dailyRow .di{width:24px;min-width:24px;text-align:center;font-size:14px}
+.dailyRow b{display:block;font-family:var(--font-head);font-weight:800;font-size:13.5px;line-height:1.3}
+.dailyRow .ds{display:block;font-size:11px;opacity:.78;margin-top:1px;line-height:1.35}
+.dailyRow .dgo{font-weight:800;opacity:.85}
+.dailyRow.done{opacity:.6}
+.dailyRow.done b{text-decoration:line-through;text-decoration-thickness:1px}
+.dailyDone{margin-top:11px;font-size:12.5px;line-height:1.5;opacity:.9;padding-right:70px}

@@ -2,10 +2,20 @@
 /* onboard1 (language) · meetTeacher · onboard3 all live in avatar.js */
 
 function toggleStage(n){ S.openStages = Object.assign({0:true}, S.openStages||{}); S.openStages[n] = !(S.openStages[n]!==undefined ? S.openStages[n] : n===0); save(); go('home'); }
+/* Someone who already knows a little should not be drilled on hallo.
+   The head start is taken from the loaded course's own first units, never
+   from a hard-coded list: a German word id seeded into a Dutch course is
+   progress in a language the learner did not ask for. */
+function warmStart(unitIndex, lv, days){
+  const u = UNITS.filter(x=>!x.planned)[unitIndex];
+  (u && u.vocab || []).filter(id=>VOCAB[id]).slice(0,7).forEach(id=>{
+    const w = wstate(id); w.lv = lv; w.seen = 1; w.due = Date.now() + days*864e5;
+  });
+}
 function obDone(level){
   S.onboarded = true;
-  if(level>=1){ ['hallo','tschuess','bitte','danke','ja','nein'].forEach(id=>{ const w=wstate(id); w.lv=2; w.seen=1; w.due=Date.now()+864e5; }); }
-  if(level>=2){ ['eins','zwei','drei','montag','rot','ich','du'].forEach(id=>{ const w=wstate(id); w.lv=3; w.seen=1; w.due=Date.now()+3*864e5; }); }
+  if(level>=1) warmStart(0, 2, 1);
+  if(level>=2) warmStart(1, 3, 3);
   save(); go('home');
   if(level===0){ const first = UNITS.find(u=>!u.planned);
     setTimeout(()=>toast(course().gogo + ' Start with ' + (first ? first.title : 'the first lesson')), 400); }
@@ -73,15 +83,11 @@ SCREENS.home = () => {
 </div>
     ${(typeof voiceWarning==='function') ? voiceWarning() : ''}
     ${revCard}
- <div class="hero" style="position:relative;overflow:hidden">
- <div style="position:absolute;right:0;bottom:-12px">${avatarSVG((S.langPicked||S.onboarded)?'de':'neutral','warm',84)}</div>
- <div style="font-size:12px;font-weight:800;opacity:.8">TODAY'S PLAN</div>
- <div style="font-family:var(--font-head);font-weight:800;font-size:18px;margin:6px 80px 12px 0">${due.length ? `${due.length} word${due.length>1?'s':''} to review` : 'No reviews due'}${nextUnit ? `, then: ${nextUnit.title}` : due.length ? '' : ' · all caught up!'}</div>
- <div class="row">
-        ${due.length?`<button class="btn small" style="background:var(--hi);color:var(--hi-ink)" onclick="startReview()">Review · ~${Math.ceil(due.length/3)} min</button>`:''}
-        ${nextUnit?`<button class="btn small" style="background:rgba(255,255,255,.22);color:var(--hero-ink)" onclick="${nextUnit.id==='s0a' ? (unitState('s0a').lesson?`startCheck('s0a')`:`startLesson1()`) : `go('unit','${nextUnit.id}')`}">${unitState(nextUnit.id).lesson?'Take the check':'Start lesson'}</button>`:''}
-</div>
-</div>
+    ${dailyCard()}
+    ${nextUnit ? `<div class="card" style="margin-top:10px;cursor:pointer" onclick="${nextUnit.id==='s0a' ? (unitState('s0a').lesson?`startCheck('s0a')`:`startLesson1()`) : `go('unit','${nextUnit.id}')`}">
+ <div class="row"><span style="font-size:20px">${(nextUnit.icon||'').length<=2 ? (nextUnit.icon||'📘') : '📘'}</span><div class="grow"><b style="font-size:13.5px">${unitState(nextUnit.id).lesson?'Take the check':'Next lesson'}</b>
+ <div class="usub">${esc(nextUnit.title)}</div></div>
+ <span style="color:var(--accent);font-weight:800">→</span></div></div>` : ''}
     ${msReady &&!milestonePassed() ? `<div class="card" style="margin-top:12px;border-color:var(--warn);cursor:pointer" onclick="go('milestone')"><div class="row"><span style="font-size:20px">📊</span><div class="grow"><b style="font-size:14px">Milestone 1 report is ready</b><div class="usub">See where you really stand → unlock Unit 4</div></div><span style="color:var(--accent);font-weight:800">→</span></div></div>` : ''}
     ${milestonePassed() &&!S.milestoneSeen ? `<div class="card" style="margin-top:12px;border-color:var(--good);cursor:pointer" onclick="go('milestone')"><div class="row"><span class="confetti" style="font-size:20px"></span><div class="grow"><b style="font-size:14px">Milestone 1 passed!</b><div class="usub">Unit 4 unlocked, see your report</div></div></div></div>` : ''}
     ${rows}

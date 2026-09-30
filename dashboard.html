@@ -1,0 +1,498 @@
+<title>Sprak Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#E7E2D8;margin:0;color:#28241F}.canvas{background:#F3F0EA;width:1500px;min-height:940px;display:flex;color:#28241F}.scroller{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}.hint{font:500 12px/1.5 'Inter',system-ui,sans-serif;color:#6E675C;padding:10px 14px;background:#E7E2D8}
+/* sidebar */
+.side{width:230px;background:#221E19;color:#EDE8DF;padding:22px 14px;display:flex;flex-direction:column;gap:4px}
+.logo{display:flex;align-items:center;gap:10px;padding:0 8px 18px}
+.logo .f{width:34px;height:34px;border-radius:10px;background:#F2C14E;color:#221E19;display:flex;align-items:center;justify-content:center;font-family:'Nunito';font-weight:800;font-size:17px}
+.logo b{font-family:'Nunito';font-weight:800;font-size:16px}.logo span{font-size:10px;color:#A89F91;display:block}
+.nav{padding:9px 10px;border-radius:9px;font-size:13px;color:#B8AFA1;display:flex;gap:9px;align-items:center}
+.nav.on{background:#3A342C;color:#fff;font-weight:600}
+.nav i{width:16px;height:16px;border-radius:5px;background:#4A443A;display:inline-block;font-style:normal}
+.nav.on i{background:#F2C14E}
+.side .sec{font-size:10px;letter-spacing:.08em;color:#7A7264;padding:14px 10px 4px;font-weight:600}
+/* main */
+.main{flex:1;display:flex;flex-direction:column}
+.top{height:60px;background:#FBF8F3;border-bottom:1px solid #E3DDD1;display:flex;align-items:center;gap:14px;padding:0 22px}
+.crumb{font-size:13px;color:#8A8172}
+.crumb b{color:#28241F}
+.search{margin-left:auto;background:#EFEAE0;border-radius:9px;padding:8px 14px;font-size:12px;color:#8A8172;width:220px}
+.draft{background:#FDEECC;color:#8A6A14;font-size:11px;font-weight:600;padding:6px 10px;border-radius:7px}
+.pub{background:#274FA1;color:#fff;font-size:12.5px;font-weight:600;padding:9px 16px;border-radius:9px}
+.av{width:34px;height:34px;border-radius:50%;background:#9DBEA6;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#1E3326}
+.body{flex:1;display:flex;gap:18px;padding:20px 22px}
+.col{display:flex;flex-direction:column;gap:12px}
+/* languages rail */
+.langs{width:250px}
+.card{background:#fff;border:1px solid #E3DDD1;border-radius:14px;padding:14px}
+.h{font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center}
+.h .add{margin-left:auto;background:#274FA1;color:#fff;border-radius:7px;font-size:11px;padding:4px 9px;font-weight:600}
+.lang{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;font-size:13px}
+.lang.on{background:#F3EFE6;font-weight:600}
+.flag{width:26px;height:18px;border-radius:4px;overflow:hidden;display:flex;flex-direction:column}
+.flag div{flex:1}
+.stat{margin-left:auto;font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px}
+.live{background:#DFF0E4;color:#256A42}.beta{background:#FDEECC;color:#8A6A14}.draftS{background:#EAE6DD;color:#7A7264}
+.mini{font-size:11px;color:#8A8172;line-height:1.6;margin-top:10px;border-top:1px solid #EFEAE0;padding-top:10px}
+/* material rows */
+.mat{background:#FBF9F4;border:1px solid #EFE9DD;border-radius:10px;padding:10px 11px;margin-bottom:7px}
+.mat .t{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;line-height:1.35}
+.mat .s{font-size:10.5px;color:#8A8172;margin:4px 0 0}
+.badge{color:#fff;font-size:8.5px;font-weight:700;padding:2px 5px;border-radius:4px;flex-shrink:0}
+.bpdf{background:#DE4B3B}.blink{background:#274FA1}.bdata{background:#3F6FA8}
+.bar{height:6px;border-radius:3px;background:#EAE6DD;margin-top:6px}
+.bar i{display:block;height:6px;border-radius:3px;background:#3F945F}
+.use{font-size:10px;color:#256A42;font-weight:600;margin-top:4px}
+.useW{font-size:10px;color:#8A6A14;font-weight:600;margin-top:4px}
+/* syllabus tree */
+.tree{flex:1}
+.stage{background:#fff;border:1px solid #E3DDD1;border-radius:14px;padding:14px;margin-bottom:12px}
+.stage .sh{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:700;margin-bottom:10px}
+.tag{font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px;background:#EAF0FA;color:#274FA1}
+.unit{display:flex;align-items:center;gap:10px;background:#FBF9F4;border:1px solid #EFE9DD;border-radius:10px;padding:10px 12px;margin-bottom:7px;font-size:13px}
+.unit .grip{color:#C4BBAA;font-size:14px;letter-spacing:1px}
+.unit b{font-weight:600}
+.unit .m{font-size:11px;color:#8A8172}
+.unit .right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.pill{font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px}
+.ok{background:#DFF0E4;color:#256A42}.warn{background:#FCE8E4;color:#9C3A24}.edit{background:#EAF0FA;color:#274FA1}.src{background:#F3EFE6;color:#7A7264}
+.unit.sel{border:1.5px solid #274FA1;background:#F5F8FE}
+.addu{border:1.5px dashed #D5CDBD;border-radius:10px;padding:9px;text-align:center;font-size:12px;color:#8A8172}
+/* detail panel */
+.detail{width:430px}
+.dh{font-size:15px;font-weight:700}
+.dsub{font-size:11.5px;color:#8A8172;margin:3px 0 12px}
+.f{margin-bottom:11px}
+.f label{font-size:10.5px;font-weight:600;color:#7A7264;letter-spacing:.04em;display:block;margin-bottom:5px}
+.inp{background:#FBF9F4;border:1px solid #E3DDD1;border-radius:9px;padding:9px 11px;font-size:12.5px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:#F3EFE6;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:500}
+.chip.plus{background:#EAF0FA;color:#274FA1;font-weight:600}
+.lesson{display:flex;align-items:center;gap:8px;background:#FBF9F4;border:1px solid #EFE9DD;border-radius:9px;padding:8px 10px;margin-bottom:6px;font-size:12px}
+.lesson .grip{color:#C4BBAA}
+.lesson .n{font-weight:600}
+.lesson .right{margin-left:auto;display:flex;gap:6px;align-items:center;font-size:10.5px;color:#8A8172}
+.rule{background:#FDF7E8;border:1px solid #F2E4BB;border-radius:10px;padding:11px 12px;font-size:12px;line-height:1.65}
+.rule b{font-size:11px;letter-spacing:.04em;color:#8A6A14;display:block;margin-bottom:4px}
+.rl{display:flex;gap:7px;align-items:center;margin-top:3px}
+.rl .dot{width:7px;height:7px;border-radius:50%;background:#274FA1}
+.an{display:flex;gap:10px;margin-top:2px}
+.stat2{flex:1;background:#FBF9F4;border-radius:9px;padding:9px;text-align:center}
+.stat2 .v{font-family:'Nunito';font-weight:800;font-size:17px}
+.stat2 .l{font-size:9.5px;color:#8A8172;margin-top:2px}
+.red{color:#9C3A24}
+.fix{background:#F5F8FE;border:1px solid #DCE6F2;border-radius:10px;padding:10px 11px;font-size:11.5px;line-height:1.6}
+.fix b{color:#274FA1;font-size:10.5px;letter-spacing:.04em;display:block;margin-bottom:4px}
+/* notifications & email */
+.chan{display:flex;align-items:flex-start;gap:9px;background:#FBF9F4;border:1px solid #EFE9DD;border-radius:10px;padding:10px 11px;margin-bottom:7px}
+.chan .ci{width:22px;height:22px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px}
+.chan .t{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:7px}
+.chan .s{font-size:10.5px;color:#8A8172;line-height:1.5;margin-top:3px}
+.blockedS{background:#FCE8E4;color:#9C3A24}
+.phone{background:#221E19;border-radius:12px;padding:11px 12px;color:#EDE8DF;margin-bottom:7px}
+.phone .ph{display:flex;align-items:center;gap:7px;font-size:9.5px;color:#A89F91;margin-bottom:6px;letter-spacing:.03em}
+.phone .pi{width:15px;height:15px;border-radius:5px;background:#F2C14E;color:#221E19;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.phone .pt{font-size:12px;font-weight:700;margin-bottom:3px}
+.phone .pb{font-size:11.5px;line-height:1.5;color:#D6CFC2}
+.copy{font-size:11.5px;color:#4A443A;line-height:1.55;padding:6px 0;border-bottom:1px dashed #EFE9DD;display:flex;gap:8px}
+.copy:last-child{border-bottom:0}
+.copy .num{color:#B6AC99;font-weight:700;font-size:10px;padding-top:1px}
+.mail{background:#FBF9F4;border:1px solid #EFE9DD;border-radius:10px;padding:10px 11px;margin-bottom:7px}
+.mail .sub{font-size:12px;font-weight:700}
+.mail .pre{font-size:11px;color:#8A8172;margin-top:2px}
+.mail .meta{font-size:10px;color:#8A8172;margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.gword{background:#FCE8E4;color:#9C3A24;font-size:10.5px;font-weight:600;padding:3px 7px;border-radius:6px;text-decoration:line-through}
+.tl{display:flex;gap:0;margin-top:2px}
+.tl div{flex:1;text-align:center;font-size:9.5px;padding:7px 2px;border-right:1px solid #EFE9DD}
+.tl div:last-child{border-right:0}
+.tl b{display:block;font-family:'Nunito';font-weight:800;font-size:12px;margin-bottom:3px}
+.tl .k{color:#274FA1;font-weight:700;font-size:9px;letter-spacing:.03em}
+</style>
+<div class="hint">Sprak Studio — admin dashboard, static design mockup. Scroll sideways on a narrow screen.</div>
+<div class="scroller"><div class="canvas">
+
+<div class="side">
+  <div class="logo"><div class="f">S</div><div><b>Sprak</b><span>STUDIO · ADMIN</span></div></div>
+  <div class="nav"><i></i>Overview</div>
+  <div class="sec">CONTENT</div>
+  <div class="nav"><i></i>Languages</div>
+  <div class="nav on"><i></i>Syllabus</div>
+  <div class="nav"><i></i>Exercises</div>
+  <div class="nav"><i></i>Vocabulary</div>
+  <div class="nav"><i></i>Scenarios</div>
+  <div class="nav"><i></i>Culture cards</div>
+  <div class="nav"><i></i>Materials &amp; resources</div>
+  <div class="sec">ENGAGEMENT</div>
+  <div class="nav"><i></i>Notifications &amp; email</div>
+  <div class="sec">QUALITY</div>
+  <div class="nav"><i></i>Analytics</div>
+  <div class="nav"><i></i>Review queue</div>
+  <div class="sec">SYSTEM</div>
+  <div class="nav"><i></i>Learners</div>
+  <div class="nav"><i></i>Roles &amp; access</div>
+</div>
+
+<div class="main">
+  <div class="top">
+    <div class="crumb">Syllabus / <b>Dutch · A1 track</b></div>
+    <div class="draft">Stage 0 authored · not yet wired to the app</div>
+    <div class="search">Search units, lessons, words…</div>
+    <div class="pub">Preview &amp; publish</div>
+    <div class="av">S</div>
+  </div>
+  <div class="body">
+
+    <div class="col langs">
+      <div class="card">
+        <div class="h">Languages <div class="add">+ Add</div></div>
+        <div class="lang"><div class="flag"><div style="background:#111"></div><div style="background:#DE1017"></div><div style="background:#FFCC00"></div></div>German<div class="stat live">LIVE</div></div>
+        <div class="lang on"><div class="flag"><div style="background:#AE1C28"></div><div style="background:#fff"></div><div style="background:#21468B"></div></div>Dutch<div class="stat beta">PARKED</div></div>
+        <div class="lang"><div class="flag"><div style="background:#DE2910"></div><div style="background:#DE2910"></div><div style="background:#FFDE00"></div></div>Mandarin<div class="stat beta">PARKED</div></div>
+        <div class="lang"><div class="flag" style="flex-direction:row"><div style="background:#0055A4"></div><div style="background:#fff"></div><div style="background:#EF4135"></div></div>French<div class="stat draftS">DRAFT</div></div>
+        <div class="lang"><div class="flag"><div style="background:#AA151B"></div><div style="background:#F1BF00"></div><div style="background:#AA151B"></div></div>Spanish<div class="stat draftS">DRAFT</div></div>
+        <div class="mini"><b>German is the only course a learner can reach.</b> <code>LIVE_LANGS = ['de']</code>. Dutch Stage 0 (9 units, 174 words, 65 moves) and the Mandarin proof stay compiled in and tested at <code>?langs=all</code>, so nothing rots while they wait. Shipping them is one array entry each.</div>
+      </div>
+
+      <div class="card">
+        <div class="h">Materials · Dutch <div class="add">+ Upload / link</div></div>
+
+        <div class="mat">
+          <div class="t"><span class="badge bpdf">PDF</span>100 Essential Dutch Words</div>
+          <div class="s">100 words with articles · easydutchlearning.nl · coverage target for Stage 0</div>
+          <div class="bar"><i style="width:53%"></i></div>
+          <div class="use">Stage 0 covers 53% · 47 words open for Stage 1</div>
+        </div>
+
+        <div class="mat">
+          <div class="t"><span class="badge bpdf">PDF</span>Dutch: An Essential Grammar</div>
+          <div class="s">Shetter &amp; Ham, Routledge 9th ed · 294 pp · 27 chapters</div>
+          <div class="s" style="margin-top:3px">Canonical rule source: de/het, plurals, diminutives, niet vs geen, verb second</div>
+          <div class="useW">Corrected 1 published rule in n0d · see review queue</div>
+        </div>
+
+        <div class="mat">
+          <div class="t"><span class="badge bpdf">PDF</span>Welkom in Nederland (KNM)</div>
+          <div class="s">Gathier, Coutinho · 228 pp · 10 chapters · official inburgering text</div>
+          <div class="s" style="margin-top:3px">Feeds every culture note, and all of unit n0i</div>
+          <div class="use">9 culture cards sourced · 17 officialdom words</div>
+        </div>
+
+        <div class="mat">
+          <div class="t"><span class="badge bpdf">PDF</span>Teach Yourself Dutch</div>
+          <div class="s">Quist &amp; Strik · 16 units · pronunciation front-matter</div>
+          <div class="s" style="margin-top:3px">Sequencing reference · units 1–7 are A1, A2 begins at unit 8</div>
+          <div class="use">Confirmed sounds-first ordering for n0a</div>
+        </div>
+
+        <div class="mat">
+          <div class="t"><span class="badge bpdf">PDF</span>Taalthuis</div>
+          <div class="s">111 pp · 10 beginner + 10 intermediate lessons · no CEFR labels</div>
+          <div class="s" style="margin-top:3px">Lesson-order reference · puts de/het and niet/geen in lesson 1</div>
+        </div>
+
+        <div class="mini">Materials are per-language, versioned, and attachable to units. Coverage is tracked against a canonical list.</div>
+      </div>
+
+      <div class="card">
+        <div class="h">Shared · cross-language <div class="add">+ Upload / link</div></div>
+        <div class="mat" style="background:#F4F7FB;border-color:#DCE6F2">
+          <div class="t"><span class="badge bdata">DATA</span>Core Vocabulary — 4 languages</div>
+          <div class="s">1103 entries · 8 modules / 40 lessons · EN · NL · DE · FR</div>
+          <div style="display:flex;gap:4px;margin:6px 0 0">
+            <span style="background:#EDF2F9;color:#3F6FA8;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px">EN</span>
+            <span style="background:#EDF2F9;color:#3F6FA8;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px">NL</span>
+            <span style="background:#EDF2F9;color:#3F6FA8;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px">DE</span>
+            <span style="background:#EDF2F9;color:#3F6FA8;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px">FR</span>
+            <span style="background:#F4F1EA;color:#A79C88;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;border:1px dashed #D8D0BE">+ ADD</span>
+          </div>
+          <div class="use">Reference only — not published to lessons</div>
+        </div>
+        <div class="mat">
+          <div class="t"><span class="badge blink">LINK</span>LearnDutch.org course hub</div>
+          <div class="s">structure reference · <span style="color:#B4571F;font-weight:600">licence: commercial — link only</span></div>
+        </div>
+        <div class="mini">Cross-language assets live here rather than on one language shelf. A new language adds a column, not a new file.</div>
+      </div>
+
+      <div class="card">
+        <div class="h">Pack versions</div>
+        <div class="mini" style="border:0;margin:0;padding:0">nl-A1 <b>v1</b> · authored, unwired<br>de-A1 v14 · published<br>fr-A1 v2 · in review</div>
+      </div>
+    </div>
+
+    <div class="col tree">
+      <div class="stage">
+        <div class="sh">⠿ Stage 0 · Fundamenten <span class="tag">9 units</span><span class="pill ok" style="margin-left:auto">authored · 0 errors</span></div>
+        <div class="unit"><span class="grip">⠿</span><b>n0a · Klanken en groeten</b><span class="m">7 moves · 18 words</span><div class="right"><span class="pill src">Teach Yourself</span></div></div>
+        <div class="unit"><span class="grip">⠿</span><b>n0b · Wie ben jij?</b><span class="m">8 moves · 21 words</span><div class="right"><span class="pill src">Essential Grammar</span></div></div>
+        <div class="unit"><span class="grip">⠿</span><b>n0c · Ik ben, ik heb</b><span class="m">8 moves · 18 words</span><div class="right"><span class="pill src">Essential Grammar</span></div></div>
+        <div class="unit sel"><span class="grip">⠿</span><b>n0d · de of het</b><span class="m">7 moves · 25 words</span><div class="right"><span class="pill edit">rule corrected</span></div></div>
+        <div class="unit"><span class="grip">⠿</span><b>n0e · Meervoud en verkleinwoord</b><span class="m">8 moves · 14 words</span><div class="right"><span class="pill ok">new</span></div></div>
+        <div class="unit"><span class="grip">⠿</span><b>n0f · Getallen en prijzen</b><span class="m">6 moves · 25 words</span></div>
+        <div class="unit"><span class="grip">⠿</span><b>n0g · Tijd en dagen</b><span class="m">7 moves · 17 words</span></div>
+        <div class="unit"><span class="grip">⠿</span><b>n0h · Waar is …?</b><span class="m">7 moves · 23 words</span></div>
+        <div class="unit"><span class="grip">⠿</span><b>n0i · Bij de gemeente</b><span class="m">7 moves · 17 words</span><div class="right"><span class="pill src">Welkom in NL</span><span class="pill ok">new</span></div></div>
+      </div>
+
+      <div class="stage">
+        <div class="sh">⠿ Stage 1 · A1 Kern <span class="tag">planned</span><span class="pill warn" style="margin-left:auto">47 words open</span></div>
+        <div class="unit" style="opacity:.8"><span class="grip">⠿</span><b>Bijvoeglijke naamwoorden</b><span class="m">17 of the 47 gap words are adjectives</span><div class="right"><span class="pill src">from gap list</span></div></div>
+        <div class="unit" style="opacity:.8"><span class="grip">⠿</span><b>Voorzetsels</b><span class="m">all 12 prepositions still untaught</span><div class="right"><span class="pill warn">largest gap</span></div></div>
+        <div class="unit" style="opacity:.8"><span class="grip">⠿</span><b>Werkwoorden · stam + t</b><span class="m">regular present tense · 11 verbs open</span></div>
+        <div class="unit" style="opacity:.8"><span class="grip">⠿</span><b>Thuis en in de stad</b><span class="m">6 nouns open · restaurant, ziekenhuis, muur</span></div>
+        <div class="addu">+ Add unit &nbsp;·&nbsp; Stage 1 scope is generated from the coverage gap, not guessed</div>
+      </div>
+    </div>
+
+    <div class="col detail">
+      <div class="card">
+        <div class="dh">n0d · de of het</div>
+        <div class="dsub">Dutch Stage 0 · authored from source · 1 rule corrected</div>
+
+        <div class="f"><label>CONCEPT</label><div class="inp">Every Dutch noun is a de-word or a het-word, and you must learn it with the noun.</div></div>
+
+        <div class="f"><label>SOURCED FROM</label><div class="chips"><span class="chip">Essential Grammar §4.1</span><span class="chip">100 Essential Words</span><span class="chip">Taalthuis L1</span><span class="chip plus">+ attach</span></div></div>
+
+        <div class="f"><label>REVIEW QUEUE · 1 ITEM</label>
+          <div class="fix"><b>RULE CORRECTED FROM SOURCE</b>
+            Draft said <b>three quarters</b> of nouns take <i>de</i>. Shetter &amp; Ham §4.1 says <b>roughly two thirds</b>. Elicit options, grammar note, recap and check question all updated.
+          </div>
+        </div>
+
+        <div class="f"><label>TEACHING MOVES · drag to reorder</label>
+          <div class="lesson"><span class="grip">⠿</span><span class="n">hook</span><div class="right">two articles, no cases</div></div>
+          <div class="lesson"><span class="grip">⠿</span><span class="n">elicit</span><div class="right">what share take de?</div></div>
+          <div class="lesson"><span class="grip">⠿</span><span class="n">model</span><div class="right">6 nouns with articles</div></div>
+          <div class="lesson"><span class="grip">⠿</span><span class="n">reveal</span><div class="right">the three rules that hold</div></div>
+          <div class="lesson"><span class="grip">⠿</span><span class="n">trap</span><div class="right">het huis → de huizen</div></div>
+          <div class="lesson"><span class="grip">⠿</span><span class="n">recap</span><div class="right">learn the article with the word</div></div>
+        </div>
+
+        <div class="f"><label>INVARIANTS · CHECKED ON EVERY BUILD</label>
+          <div class="rule"><b>check.mjs · 0 failures</b>
+            <div class="rl"><span class="dot"></span>Every noun carries <b>de</b> or <b>het</b></div>
+            <div class="rl"><span class="dot"></span>No move's spoken line repeats its board</div>
+            <div class="rl"><span class="dot"></span>No orphaned or undefined word ids</div>
+            <div class="rl"><span class="dot"></span>No em dashes, no decorative emoji</div>
+          </div>
+        </div>
+
+        <div class="f"><label>STAGE 0 TOTALS</label>
+          <div class="an">
+            <div class="stat2"><div class="v">174</div><div class="l">words authored</div></div>
+            <div class="stat2"><div class="v">65</div><div class="l">teaching moves</div></div>
+            <div class="stat2"><div class="v">53%</div><div class="l">essential-list coverage</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div></div>
+
+<div class="hint">Sprak Studio — <b>Notifications &amp; email</b>. Copy is real: every line below is in <code>src/nudges.js</code> and asserted by <code>tests/t-nudges.mjs</code>.</div>
+<div class="scroller"><div class="canvas">
+
+<div class="side">
+  <div class="logo"><div class="f">S</div><div><b>Sprak</b><span>STUDIO · ADMIN</span></div></div>
+  <div class="nav"><i></i>Overview</div>
+  <div class="sec">CONTENT</div>
+  <div class="nav"><i></i>Languages</div>
+  <div class="nav"><i></i>Syllabus</div>
+  <div class="nav"><i></i>Exercises</div>
+  <div class="nav"><i></i>Vocabulary</div>
+  <div class="nav"><i></i>Scenarios</div>
+  <div class="nav"><i></i>Culture cards</div>
+  <div class="nav"><i></i>Materials &amp; resources</div>
+  <div class="sec">ENGAGEMENT</div>
+  <div class="nav on"><i></i>Notifications &amp; email</div>
+  <div class="sec">QUALITY</div>
+  <div class="nav"><i></i>Analytics</div>
+  <div class="nav"><i></i>Review queue</div>
+  <div class="sec">SYSTEM</div>
+  <div class="nav"><i></i>Learners</div>
+  <div class="nav"><i></i>Roles &amp; access</div>
+</div>
+
+<div class="main">
+  <div class="top">
+    <div class="crumb">Engagement / <b>Notifications &amp; email</b></div>
+    <div class="draft">67 lines written and tested · nothing is sending yet</div>
+    <div class="search">Search copy, situations, templates…</div>
+    <div class="pub">Preview &amp; publish</div>
+    <div class="av">S</div>
+  </div>
+  <div class="body">
+
+    <div class="col langs">
+      <div class="card">
+        <div class="h">Channels</div>
+
+        <div class="chan">
+          <div class="ci" style="background:#DFF0E4;color:#256A42">✓</div>
+          <div><div class="t">Return card, in app <span class="stat live">LIVE</span></div>
+            <div class="s">Renders on Home when the learner comes back. This is the only channel actually delivering copy today.</div></div>
+        </div>
+
+        <div class="chan">
+          <div class="ci" style="background:#FDEECC;color:#8A6A14">!</div>
+          <div><div class="t">Web push <span class="stat beta">NOT BUILT</span></div>
+            <div class="s">Needs a service worker, a VAPID key pair and a subscription store. No account required, so this ships first.</div></div>
+        </div>
+
+        <div class="chan">
+          <div class="ci" style="background:#FCE8E4;color:#9C3A24">✕</div>
+          <div><div class="t">Email <span class="stat blockedS">BLOCKED</span></div>
+            <div class="s">The first screen promises <b>no account, no forms, nothing leaves the device</b>. Email needs an address, a server, a privacy policy and a GDPR basis. Product decision, not a copy decision.</div></div>
+        </div>
+
+        <div class="mini">Templates for all three are written either way, so the channel work is plumbing and not authoring.</div>
+      </div>
+
+      <div class="card">
+        <div class="h">Delivery rules</div>
+        <div class="rule"><b>SEVEN RULES · SRC/NUDGES.JS</b>
+          <div class="rl"><span class="dot"></span>Specific beats witty</div>
+          <div class="rl"><span class="dot"></span>Never guilt</div>
+          <div class="rl"><span class="dot"></span>Longer away, gentler tone</div>
+          <div class="rl"><span class="dot"></span>Rotate, seeded by the day</div>
+          <div class="rl"><span class="dot"></span>From the teacher, not the app</div>
+          <div class="rl"><span class="dot"></span>It contains the language</div>
+          <div class="rl"><span class="dot"></span>One a day, at an hour they chose</div>
+        </div>
+        <div class="mini">Rule 2 exists because this audience is doing this after a ten-hour shift. Duolingo can guilt a hobbyist.</div>
+      </div>
+
+      <div class="card">
+        <div class="h">Caps &amp; quiet hours</div>
+        <div class="f"><label>MAXIMUM PER DAY</label><div class="inp">1 push</div></div>
+        <div class="f"><label>SEND HOUR</label><div class="inp">Chosen by the learner · default 19:00 local</div></div>
+        <div class="f" style="margin-bottom:0"><label>QUIET</label><div class="inp">22:00 – 08:00, never overridden</div></div>
+      </div>
+    </div>
+
+    <div class="col tree">
+      <div class="stage">
+        <div class="sh">⠿ Situations <span class="tag">8 banks</span><span class="pill ok" style="margin-left:auto">67 lines · 3 languages</span></div>
+        <div class="unit"><span class="grip">⠿</span><b>away1</b><span class="m">1 day since last session · “6 words are due. Six is one tram stop.”</span><div class="right"><span class="pill src">12 lines</span></div></div>
+        <div class="unit"><span class="grip">⠿</span><b>away3</b><span class="m">3 days · “Three days. Your words are still here, and so am I.”</span><div class="right"><span class="pill src">10 lines</span></div></div>
+        <div class="unit"><span class="grip">⠿</span><b>away7</b><span class="m">a week · “A week. No lecture. Open the app, do five words.”</span><div class="right"><span class="pill src">9 lines</span></div></div>
+        <div class="unit sel"><span class="grip">⠿</span><b>away14</b><span class="m">two weeks and beyond · the gentlest bank in the file</span><div class="right"><span class="pill edit">selected</span><span class="pill src">9 lines</span></div></div>
+        <div class="unit"><span class="grip">⠿</span><b>due</b><span class="m">words are due today · the workhorse</span><div class="right"><span class="pill src">9 lines</span></div></div>
+        <div class="unit"><span class="grip">⠿</span><b>hand</b><span class="m">a unit not yet copied out by hand</span><div class="right"><span class="pill src">6 lines</span></div></div>
+        <div class="unit"><span class="grip">⠿</span><b>soon</b><span class="m">a real appointment this week · highest intent, no trigger yet</span><div class="right"><span class="pill warn">needs date picker</span><span class="pill src">6 lines</span></div></div>
+        <div class="unit"><span class="grip">⠿</span><b>win</b><span class="m">a milestone worth naming · fired after a passed check</span><div class="right"><span class="pill src">6 lines</span></div></div>
+      </div>
+
+      <div class="stage">
+        <div class="sh">⠿ Escalation <span class="tag">by days away</span><span class="pill ok" style="margin-left:auto">pressure goes down, not up</span></div>
+        <div class="tl">
+          <div><span class="k">DAY 0</span><b>due</b>counts words</div>
+          <div><span class="k">DAY 1</span><b>away1</b>light, specific</div>
+          <div><span class="k">DAY 3</span><b>away3</b>names the drift</div>
+          <div><span class="k">DAY 7</span><b>away7</b>no lecture</div>
+          <div><span class="k">DAY 14+</span><b>away14</b>nothing is lost</div>
+        </div>
+        <div class="mini" style="border-top:1px solid #EFEAE0;margin-top:10px">Most apps get harsher the longer you are gone. <code>t-nudges.mjs</code> asserts the opposite: every <code>away14</code> line in all three languages must contain <i>still yours</i>, <i>not starting over</i> or <i>nothing</i>.</div>
+      </div>
+
+      <div class="stage">
+        <div class="sh">⠿ Per language <span class="tag">3 packs</span><span class="pill ok" style="margin-left:auto">no shared strings</span></div>
+        <div class="unit"><span class="grip">⠿</span><b>NUDGE_DE · Klara</b><span class="m">23 lines · “Four minutes today beats forty on Sunday.”</span><div class="right"><span class="pill ok">live</span></div></div>
+        <div class="unit"><span class="grip">⠿</span><b>NUDGE_NL · Sanne</b><span class="m">22 lines · “Half drie is 2:30, not 3:30. You knew that last week.”</span><div class="right"><span class="pill ok">authored</span></div></div>
+        <div class="unit"><span class="grip">⠿</span><b>NUDGE_ZH · Lin</b><span class="m">22 lines · “妈 mā or 马 mǎ? One is your mother, one is a horse.”</span><div class="right"><span class="pill ok">authored</span></div></div>
+        <div class="addu">+ Add language bank &nbsp;·&nbsp; a new course without a bank falls back to nothing, never to another language’s copy</div>
+      </div>
+
+      <div class="stage">
+        <div class="sh">⠿ To make push deliver <span class="tag">4 steps</span><span class="pill warn" style="margin-left:auto">copy is not the blocker</span></div>
+        <div class="unit"><span class="grip">⠿</span><b>Service worker</b><span class="m">sw.js, registered at boot · also makes the app installable</span><div class="right"><span class="pill warn">not started</span></div></div>
+        <div class="unit"><span class="grip">⠿</span><b>VAPID key pair</b><span class="m">public key in the client, private key wherever the sender runs</span><div class="right"><span class="pill warn">not started</span></div></div>
+        <div class="unit"><span class="grip">⠿</span><b>Permission prompt, asked late</b><span class="m">after a passed check, never on first open · a declined prompt is permanent</span><div class="right"><span class="pill edit">copy ready</span></div></div>
+        <div class="unit"><span class="grip">⠿</span><b>Subscription store + daily sender</b><span class="m">endpoint per device · picks the bank from days away, sends one</span><div class="right"><span class="pill warn">not started</span></div></div>
+        <div class="unit"><span class="grip">⠿</span><b>Week-ahead appointment picker</b><span class="m">unlocks the <b>soon</b> bank and the third email, the two highest-intent sends</span><div class="right"><span class="pill warn">blocks 2 of 11</span></div></div>
+        <div class="mini" style="border-top:1px solid #EFEAE0;margin-top:10px">iOS delivers web push only to an app added to the Home Screen. Android delivers it to any installed PWA. Neither needs an account, which is why push comes before email.</div>
+      </div>
+    </div>
+
+    <div class="col detail">
+      <div class="card">
+        <div class="dh">away14 · two weeks and beyond</div>
+        <div class="dsub">Fires at 14 days since the last session · 3 lines per language · rotates by day</div>
+
+        <div class="f"><label>PREVIEW · ON THE LOCK SCREEN</label>
+          <div class="phone">
+            <div class="ph"><span class="pi">S</span>SPRAK · now</div>
+            <div class="pt">Klara</div>
+            <div class="pb">Shreya, you learned 84 German words. They are still yours. Nothing has been deleted.</div>
+          </div>
+          <div class="phone" style="background:#2B2620">
+            <div class="ph"><span class="pi">S</span>SPRAK · now</div>
+            <div class="pt">Lin</div>
+            <div class="pb">不着急. No hurry. Everything is saved at the level you left it.</div>
+          </div>
+        </div>
+
+        <div class="f"><label>GERMAN BANK · ROTATES DAILY</label>
+          <div class="copy"><span class="num">1</span>{name}, you learned {n} German words. They are still yours. Nothing has been deleted.</div>
+          <div class="copy"><span class="num">2</span>Starting again is not starting over. Your words are waiting, at the level you left them.</div>
+          <div class="copy"><span class="num">3</span>No streak to lose here, and nothing to apologise for. Five words is a real session.</div>
+        </div>
+
+        <div class="f"><label>TONE GUARD · BUILD FAILS ON THESE</label>
+          <div class="chips">
+            <span class="gword">forgot</span><span class="gword">don’t lose</span><span class="gword">disappoint</span>
+            <span class="gword">miss you</span><span class="gword">slacking</span><span class="gword">lazy</span>
+            <span class="gword">shame</span><span class="gword">abandoned</span>
+          </div>
+          <div class="fix" style="margin-top:9px"><b>ALSO ASSERTED BY T-NUDGES.MJS</b>
+            140 characters maximum · no em or en dashes · no <code>undefined</code> or <code>NaN</code> leaking into copy · at least three distinct lines across five consecutive days · at least one line carrying a word in the language being taught.
+          </div>
+        </div>
+
+        <div class="f" style="margin-bottom:0"><label>COPY TOTALS</label>
+          <div class="an">
+            <div class="stat2"><div class="v">67</div><div class="l">lines written</div></div>
+            <div class="stat2"><div class="v">8</div><div class="l">situations</div></div>
+            <div class="stat2"><div class="v">3</div><div class="l">email templates</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="h">Email templates</div>
+
+        <div class="mail">
+          <div class="sub">{n} things you can now say</div>
+          <div class="pre">Six weeks ago you could not say any of them.</div>
+          <div class="meta"><span class="pill ok">weekly</span><span class="pill src">lists real finished sentences</span></div>
+        </div>
+
+        <div class="mail">
+          <div class="sub">Your Nederlands is still here</div>
+          <div class="pre">Nothing has been deleted.</div>
+          <div class="meta"><span class="pill ok">after ~3 weeks</span><span class="pill src">no re-engagement pressure</span></div>
+        </div>
+
+        <div class="mail">
+          <div class="sub">Ready for Thursday?</div>
+          <div class="pre">The six sentences you will need.</div>
+          <div class="meta"><span class="pill edit">highest open rate</span><span class="pill warn">blocked on the date picker</span></div>
+        </div>
+
+        <div class="fix"><b>EMPTY SENDS ARE SUPPRESSED</b>
+          <code>buildEmail()</code> returns <code>null</code> rather than sending “0 things you can now say”. A weekly report with nothing in it is how an unsubscribe happens.
+        </div>
+
+        <div class="mini">If email is ever built: ask for the address after a passed check, never at signup, keep it optional, weekly at most.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div></div>

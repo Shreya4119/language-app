@@ -597,8 +597,16 @@ function loadCourse(lang){
    To see a parked course without shipping it: open the app with ?langs=all
    That is how tests/t-dutch.mjs and tests/t-mandarin.mjs reach them.       */
 const LIVE_LANGS = ['de'];
+/* The flag sticks once used, because retyping a query string on a phone every
+   morning is how a tester quietly stops testing. `?langs=de` clears it again
+   and puts you back in front of what a real learner sees. */
 function langPreview(){
-  try { return /(^|[?&])langs=all(&|$)/.test(location.search); } catch(e){ return false; }
+  try {
+    const q = (location.search.match(/[?&]langs=([a-z]+)/) || [])[1];
+    if(q === 'all'){ localStorage.setItem('sprak-preview', '1'); return true; }
+    if(q) { localStorage.removeItem('sprak-preview'); return false; }
+    return localStorage.getItem('sprak-preview') === '1';
+  } catch(e){ return false; }
 }
 function langLive(id){
   return LIVE_LANGS.indexOf(id) >= 0 || (!!COURSES[id] && langPreview());

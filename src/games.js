@@ -161,6 +161,7 @@ function gNext(){
 
 SCREENS.gResult = () => {
   const s = GG, g = genderSpec();
+  dailyMark('game');
   const pct = Math.round(s.ok / s.items.length * 100);
   const n = note(pct);
   app.innerHTML = `<div class="screen">

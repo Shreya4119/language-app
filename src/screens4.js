@@ -1,5 +1,16 @@
 /* ================= MILESTONE REPORT ================= */
 SCREENS.milestone = () => {
+  /* A course with fewer than three built Stage 1 units has no milestone.
+     Say so plainly instead of reporting on units that do not exist. */
+  if(!hasMilestone()){
+    app.innerHTML = `<div class="screen">
+ <div class="topbar"><button class="x" onclick="go('home')">←</button><div class="grow center"><b>Milestone</b></div><span class="counter"></span></div>
+ <div class="card" style="margin-top:14px"><p style="font-size:13.5px;line-height:1.6">The milestone report arrives after the first three units of Stage 1. ${esc(course().native)} does not have them yet, so there is nothing honest to report.</p></div>
+ <div class="grow"></div>
+ <button class="btn" onclick="go('home')">Back to path</button>
+  ${navBar('home')}</div>`;
+    return;
+  }
   const stats = skillStats();
   const reqs = milestoneReqs();
   const ready = milestoneReady();
@@ -21,7 +32,7 @@ SCREENS.milestone = () => {
  <div class="row"><span class="big">${ready?overall+'%':'·'}</span><span class="sub" style="line-height:1.4">checkpoint mastery, honest numbers, from your real answers</span></div>
       ${ready?bar('Vocabulary',stats.vocab)+bar('Grammar',stats.grammar)+bar('Listening',Math.max(stats.listening,25))+bar('Speaking',Math.max(stats.speaking,15)):''}
 </div>
- <div class="sec">To unlock Unit 4 · Einkaufen</div>
+ <div class="sec">${(()=>{ const n = milestoneNext(); return n ? 'To unlock ' + esc(n.title) : 'To pass this milestone'; })()}</div>
  <div style="display:flex;flex-direction:column;gap:8px">
     ${reqs.map((r,i)=>`<div class="card" style="padding:12px 14px;${r.ok?'':'border-color:var(--warn)'}">
  <div class="row">
@@ -30,7 +41,7 @@ SCREENS.milestone = () => {
         ${r.ok?'':r.unit?`<button class="btn small" onclick="startCheck('${r.unit}')">Go</button>`:r.drill&&r.drill.length?`<button class="btn small" onclick='startDrill(${JSON.stringify(r.drill.slice(0,6))},{scr:"milestone"})'>Drill</button>`:''}
 </div></div>`).join('')}
 </div>
-    ${passed?`<div class="card" style="margin-top:12px;border-color:var(--good)" ><div class="row"><span class="confetti"></span><div><b>Unit 4 unlocked!</b><div class="usub">Einkaufen, shopping, Pfand & markets awaits (next release adds full content).</div></div></div></div>`:''}
+    ${passed?(()=>{ const n = milestoneNext(); return n ? `<div class="card" style="margin-top:12px;border-color:var(--good)" ><div class="row"><span class="confetti"></span><div><b>${esc(n.title)} unlocked!</b><div class="usub">${esc(n.concept || n.sub || '')}</div></div></div></div>` : ''; })():''}
  <div class="grow" style="min-height:12px"></div>
  <button class="btn" onclick="go('home')">${passed?'Continue to path →':'Back to path'}</button>
   ${navBar('home')}</div>`;

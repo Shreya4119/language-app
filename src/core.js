@@ -122,11 +122,20 @@ function unlocked(u){
   if(prev.stage===0) return stage0Done() >= 3;
   return unitDone(prev.id);
 }
-function milestoneReady(){ return unitDone('u1') && unitDone('u2') && unitDone('u3'); }
+/* The milestone is "after the first three units of Stage 1", not "after u1,
+   u2 and u3". Those ids are German. A course without three built Stage 1
+   units simply has no milestone yet, and says so rather than throwing. */
+function milestoneUnits(){ return UNITS.filter(u=>!u.planned && u.stage===1).slice(0,3); }
+function hasMilestone(){ return milestoneUnits().length === 3; }
+function milestoneNext(){
+  const built = UNITS.filter(u=>u.stage===1);
+  return built[3] || null;
+}
+function milestoneReady(){ return hasMilestone() && milestoneUnits().every(u=>unitDone(u.id)); }
 function milestoneReqs(){
   const reqs = [];
-  ['u1','u2','u3'].forEach(id=>{
-    const u = UNITS.find(x=>x.id===id), st = unitState(id);
+  milestoneUnits().forEach(u=>{
+    const id = u.id, st = unitState(id);
     reqs.push({ok:(st.check||0)>=80, label:`Unit „${u.title}" check ≥ 80%`, sub:st.check!==null?`currently ${st.check}%`:'not taken yet', unit:id});
   });
   const sh = ['u1','u2','u3'].flatMap(id=>shakyWords(UNITS.find(x=>x.id===id)));

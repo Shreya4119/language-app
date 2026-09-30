@@ -2,6 +2,7 @@
 const TEACHERS = {
   de: {name:'Klara', lang:'German', hello:'Herzlich willkommen! Ich heiße Klara.',
        first:'In our first class you vill introduce yourself to me, zat is how I learn your name.',
+       levelAsk:'Before we start, how much German do you know already? Be honest, I alvays am.',
        blurb:'I teach German the way I wish somebody had taught me: from ze fundamentals, out loud, and always with ze reason behind ze rule.'},
   fr: {name:'Marie', lang:'French', hello:'Bienvenue! Je m\'appelle Marie.', blurb:'Coming soon.'},
   es: {name:'Lucía', lang:'Spanish', hello:'¡Bienvenido! Me llamo Lucía.', blurb:'Coming soon.'},
@@ -162,7 +163,6 @@ SCREENS.onboard1 = () => {
  <p class="sub center" style="font-size:12px">No account, no forms · progress saved on your device</p>
 </div>`;
 };
-SCREENS.onboard2 = () => go('onboard1');
 SCREENS.meetTeacher = () => {
   const t = TT();
   app.innerHTML = `<div class="screen noNav">
@@ -186,7 +186,7 @@ SCREENS.meetTeacher = () => {
 
 SCREENS.onboard3 = () => {
   app.innerHTML = `<div class="screen noNav">
-    ${teacherBox("Before we start, how much German do you know already? Be honest, I alvays am.", {mode:'de', expr:'warm'})}
+    ${teacherBox(TT().levelAsk || `Before we start, how much ${course().native} do you know already?`, {mode:'de', expr:'warm'})}
  <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
  <div class="pathRow" onclick="obDone(0)"><div class="badge" style="background:var(--tint)">🌱</div><div class="grow"><div class="uname">Nothing yet</div><div class="usub">Start from Hallo, perfect</div></div></div>
  <div class="pathRow" onclick="obDone(1)"><div class="badge" style="background:var(--tint)">🌿</div><div class="grow"><div class="uname">A little</div><div class="usub">I know some words & phrases</div></div></div>
