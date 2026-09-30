@@ -1,8 +1,10 @@
 /* ================= LESSON 1 · "Intro & Alphabets" ================= */
 const COUNTRY_DE = {'india':'Indien','germany':'Deutschland','france':'Frankreich','spain':'Spanien','italy':'Italien','turkey':'der Türkei','poland':'Polen','netherlands':'den Niederlanden','holland':'den Niederlanden','usa':'den USA','united states':'den USA','america':'den USA','uk':'Großbritannien','england':'England','china':'China','japan':'Japan','brazil':'Brasilien','mexico':'Mexiko','russia':'Russland','ukraine':'der Ukraine','syria':'Syrien','iran':'dem Iran','pakistan':'Pakistan','vietnam':'Vietnam','south korea':'Südkorea','korea':'Korea','greece':'Griechenland','portugal':'Portugal','austria':'Österreich','switzerland':'der Schweiz','sweden':'Schweden','norway':'Norwegen','denmark':'Dänemark','finland':'Finnland','canada':'Kanada','australia':'Australien','egypt':'Ägypten','morocco':'Marokko','nigeria':'Nigeria','kenya':'Kenia','indonesia':'Indonesien','thailand':'Thailand','philippines':'den Philippinen','bangladesh':'Bangladesch','sri lanka':'Sri Lanka','nepal':'Nepal','afghanistan':'Afghanistan','iraq':'dem Irak','israel':'Israel','romania':'Rumänien','bulgaria':'Bulgarien','hungary':'Ungarn','czech republic':'Tschechien','croatia':'Kroatien','serbia':'Serbien','albania':'Albanien','colombia':'Kolumbien','argentina':'Argentinien','chile':'Chile','peru':'Peru','ireland':'Irland','scotland':'Schottland','belgium':'Belgien'};
 const LANG_DE = {'english':'Englisch','hindi':'Hindi','marathi':'Marathi','gujarati':'Gujarati','tamil':'Tamil','telugu':'Telugu','bengali':'Bengali','urdu':'Urdu','punjabi':'Punjabi','arabic':'Arabisch','turkish':'Türkisch','spanish':'Spanisch','french':'Französisch','italian':'Italienisch','portuguese':'Portugiesisch','russian':'Russisch','ukrainian':'Ukrainisch','polish':'Polnisch','romanian':'Rumänisch','chinese':'Chinesisch','mandarin':'Chinesisch','japanese':'Japanisch','korean':'Koreanisch','vietnamese':'Vietnamesisch','thai':'Thai','indonesian':'Indonesisch','persian':'Persisch','farsi':'Persisch','dutch':'Niederländisch','greek':'Griechisch','swedish':'Schwedisch','german':'Deutsch','serbian':'Serbisch','croatian':'Kroatisch','albanian':'Albanisch','somali':'Somali','swahili':'Swahili','filipino':'Filipino','tagalog':'Tagalog','nepali':'Nepali','sinhala':'Singhalesisch','pashto':'Paschtu','kurdish':'Kurdisch','hebrew':'Hebräisch','czech':'Tschechisch','hungarian':'Ungarisch','bulgarian':'Bulgarisch'};
-function countryDe(c){ return COUNTRY_DE[(c||'').toLowerCase().trim()] || c; }
-function langDe(l){ return LANG_DE[(l||'').toLowerCase().trim()] || l; }
+/* The course pack owns everything language-shaped in this lesson. */
+function F(){ return (typeof course === 'function' && course().first) || COURSES.de.first; }
+function countryDe(c){ return (F().countries || {})[(c||'').toLowerCase().trim()] || c; }
+function langDe(l){ return (F().languages || {})[(l||'').toLowerCase().trim()] || l; }
 
 /* letter · German name · example word · English · picture */
 const ALPHABET = [
@@ -69,13 +71,21 @@ function greetTick(i, total, id){
   if(n>=total) setTimeout(()=>teacherSay('Alle Begrüßungen! Now you can greet anybody in Germany, at any hour.'), 300);
 }
 function l1GreetDone(){
-  S.greetTest = {ok: G ? G.done.length : 0, total: GREETINGS.length};
+  S.greetTest = {ok: G ? G.done.length : 0, total: (F().greetings||[]).length};
   save(); l1Next();
 }
-function startLesson1(){ L1 = {step:1, speakIdx:0, speakOk:0, speakItems:[]}; go('lesson1'); }
+/* `only` picks which half of the lesson runs:
+     'intro'    the introduction board, then reading it aloud
+     'alphabet' the greetings, then the letter drill
+     undefined  all four steps, which is what German does  */
+function startLesson1(unit, only){
+  L1 = {step: only==='alphabet' ? 4 : 1, unit: unit || F().unit, only: only||'all',
+        speakIdx:0, speakOk:0, speakItems:[]};
+  go('lesson1');
+}
 function l1Next(){ L1.step++; go('lesson1'); }
 function l1Bar(pct, label){
-  return `<div class="topbar"><button class="x" onclick="l1StopMic();go('unit','s0a')">✕</button><div class="progress"><i style="width:${pct}%"></i></div><span class="counter">${label}</span></div>`;
+  return `<div class="topbar"><button class="x" onclick="l1StopMic();go(L1&&L1.unit&&L1.unit!==F().unit?'unit':'home', L1&&L1.unit)">✕</button><div class="progress"><i style="width:${pct}%"></i></div><span class="counter">${label}</span></div>`;
 }
 /* chalkboard shell, optional teacher standing beside it */
 function chalkboard(inner, opts){
@@ -104,38 +114,41 @@ const L1_GENDER = {
   d: {de:'eine Person', en:'a person'}
 };
 function l1GenderChips(g){
-  return Object.keys(L1_GENDER).map(k =>
-    `<button type="button" class="gchip${g===k?' on':''}" id="g_${k}" onclick="l1Gender('${k}')">${L1_GENDER[k].de}</button>`
+  const G = F().gender || {};
+  return Object.keys(G).map(k =>
+    `<button type="button" class="gchip${g===k?' on':''}" id="g_${k}" onclick="l1Gender('${k}')">${esc(G[k].de)}</button>`
   ).join('');
 }
 function l1Gender(k){
   S.intro = S.intro || {};
   S.intro.g = (S.intro.g === k) ? '' : k;
   save();
-  Object.keys(L1_GENDER).forEach(x => {
+  Object.keys(F().gender || {}).forEach(x => {
     const e = document.getElementById('g_'+x);
     if(e) e.classList.toggle('on', S.intro.g === x);
   });
   l1Fill();
 }
 
-/* the board lines */
+/* the board lines, built from the course's own template */
 function l1Lines(){
   const d = S.intro || {};
-  const g = L1_GENDER[d.g];
-  return [
-    {de:'Hallo!', en:'Hello!'},
-    {de:'Guten Morgen!', en:'Good morning!'},
-    {de:`Ich heiße ${d.name||'…'}.`, en:`My name is ${d.name||'…'}.`},
-    {de:`Ich bin ${d.age||'…'} Jahre alt.`, en:`I am ${d.age||'…'} years old.`},
-    ...(g ? [{de:`Ich bin ${g.de}.`, en:`I am ${g.en}.`}] : []),
-    {de:`Ich komme aus ${countryDe(d.country)||'…'}.`, en:`I come from ${d.country||'…'}.`},
-    {de:`Ich wohne in ${d.city||'…'}.`, en:`I live in ${d.city||'…'}.`},
-    {de:`Ich spreche ${langDe(d.lang)||'…'}.`, en:`I speak ${d.lang||'…'}.`},
-    {de:'Ich lerne Deutsch.', en:'I am learning German.'},
-    {de:'Danke! Tschüss!', en:'Thank you! Bye!'}
-  ];
+  const g = (F().gender || {})[d.g];
+  const out = [];
+  for(const L of F().lines){
+    if(L.gender){ if(g) out.push({de:`${L.pre||''}${g.de}.`, en:`${L.enPrefix||'I am '}${g.en}.`}); continue; }
+    if(L.blank){
+      const raw = d[L.blank] || '';
+      const val = L.map === 'countries' ? countryDe(raw) : L.map === 'languages' ? langDe(raw) : raw;
+      out.push({de:`${L.pre||''}${val || '…'}${L.post||''}`,
+                en:`${L.en.replace(/…\s*$/,'')}${raw || '…'}${/\.$/.test(L.post||'') ? '.' : ''}`});
+      continue;
+    }
+    out.push({de:L.de, en:L.en});
+  }
+  return out;
 }
+
 function l1Fill(){
   const g = id => (document.getElementById(id) ? document.getElementById(id).value.trim() : '');
   S.intro = Object.assign({}, S.intro || {}, {
@@ -162,19 +175,17 @@ SCREENS.lesson1 = () => {
     const d = S.intro || {name:S.name||'', age:'', g:'', country:S.country||'', city:'', lang:''};
     const EN = 'color:rgba(253,248,236,.55);font-size:11px;font-style:italic;margin:-4px 0 6px 0';
     app.innerHTML = `<div class="screen noNav">${l1Bar(15,'1/4')}
-      ${teacherBox(`Let us start vith ze most useful zing you can own: your own introduction. Fill in ze blanks and it becomes yours.`, {expr:'happy', de:'Herzlich willkommen!'})}
+      ${teacherBox(F().say, {expr:'happy', de:F().hello})}
  <div class="sec" style="margin-top:0">Your introduction · fill in the blanks</div>
-      ${chalkboard(chalkTitle('Meine Vorstellung · my introduction') + `<div style="${CHALK};line-height:1.9">
-        Hallo!<div style="${EN}">Hello!</div>
-        Guten Morgen!<div style="${EN}">Good morning!</div>
-        Ich heiße ${blankInput('b_name','your name', d.name)}.<div style="${EN}">My name is …</div>
-        Ich bin ${blankInput('b_age','age', d.age, 62)} Jahre alt.<div style="${EN}">I am … years old.</div>
-        <span style="display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px;row-gap:7px">Ich bin ${l1GenderChips(d.g)}</span><div style="${EN}">I am a woman / a man · tap one, optional</div>
-        Ich komme aus ${blankInput('b_country','country', d.country)}.<div style="${EN}">I come from …</div>
-        Ich wohne in ${blankInput('b_city','your city', d.city, 108)}.<div style="${EN}">I live in …</div>
-        Ich spreche ${blankInput('b_lang','language', d.lang, 108)}.<div style="${EN}">I speak …</div>
-        Ich lerne Deutsch.<div style="${EN}">I am learning German.</div>
-        Danke! Tschüss!<div style="${EN}">Thank you! Bye!</div>
+      ${chalkboard(chalkTitle(F().boardTitle) + `<div style="${CHALK};line-height:1.9">
+        ${F().lines.map(L => {
+          const body = L.gender
+            ? `<span style="display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px;row-gap:7px">${esc(L.pre||'')}${l1GenderChips(d.g)}</span>`
+            : L.blank
+              ? `${esc(L.pre||'')}${blankInput('b_'+L.blank, L.ph, d[L.blank], L.w)}${esc(L.post||'')}`
+              : esc(L.de);
+          return body + `<div style="${EN}">${esc(L.en)}</div>`;
+        }).join('\n        ')}
 </div>`, {anna:false, min:320})}
  <div class="center" id="l1prev" style="font-size:12.5px;margin:2px 0 8px"><span class="usub">Fill all five blanks, ${TN()} is watching</span></div>
  <div class="grow"></div>
@@ -211,10 +222,10 @@ SCREENS.lesson1 = () => {
 
   /* ---------- 4 · GREETINGS ---------- */
   else if(st===4){
-    const items = GREETINGS;
+    const items = F().greetings || [];
     if(!G || G.total!== items.length) G = {done:[], total:items.length};
     app.innerHTML = `<div class="screen noNav">${l1Bar(70,'3/4')}
-      ${teacherBox(`Now ze greetings. <b>Guten Morgen</b> until eleven, <b>Guten Tag</b> until evening, <b>Guten Abend</b> after. <b>Gute Nacht</b> only at bedtime, say it in ze office and zey think you are moving in!`, {expr:'happy'})}
+      ${teacherBox(F().greetSay, {expr:'happy'})}
  <div style="display:flex;flex-direction:column;gap:7px">
         ${items.map((it,i)=>{ const [de,en,note,id] = it; const done = G.done.includes(i);
           return `<div class="card" id="gr${i}" style="padding:10px 12px;${done?'border-color:var(--good);background:color-mix(in srgb,var(--good) 7%,var(--card))':''}">
@@ -228,7 +239,7 @@ SCREENS.lesson1 = () => {
 </div>
  <div class="center" id="grmsg" style="font-size:12.5px;margin-top:10px">
  <span class="usub">Say each greeting out loud, ${TN()} marks every one.</span></div>
-      ${(()=>{ const u = UNITS.find(x=>x.id==='s0a'); return u && u.culture ? factCard('culture', u.culture) : ''; })()}
+      ${(()=>{ const u = UNITS.find(x=>x.id===(L1.unit||F().unit)); return u && u.culture ? factCard('culture', u.culture) : ''; })()}
  <div class="grow" style="min-height:10px"></div>
  <button class="btn ${G.done.length>=items.length?'':'sec2'}" id="grgo" onclick="l1GreetDone()">${G.done.length>=items.length?'Perfekt! Next: the alphabet →':`Continue (${G.done.length}/${items.length} said)`}</button>
 </div>`;
@@ -237,10 +248,10 @@ SCREENS.lesson1 = () => {
   /* ---------- 5 · ALPHABET ---------- */
   else if(st===5){
     app.innerHTML = `<div class="screen noNav">${l1Bar(92,'4/4')}
-      ${(()=>{ const g = (UNITS.find(x=>x.id==='s0a')||{}).grammar || {};
-        return chalkboard(chalkTitle(g.title || 'Das Alphabet') + `<div style="${CHALK};line-height:1.7">${g.body || ''}</div>`, {expr:'calm', min:170}); })()}
-      ${teacherBox(`Tap a letter · I say it <i>and</i> give you a word that starts with it. Zirty letters, zirty new words.`, {expr:'warm'})}
-      ${(()=>{ const g = (UNITS.find(x=>x.id==='s0a')||{}).grammar || {};
+      ${(()=>{ const g = (UNITS.find(x=>x.id===(L1.unit||F().unit))||{}).grammar || {};
+        return chalkboard(chalkTitle(g.title || F().abcTitle || 'Alphabet') + `<div style="${CHALK};line-height:1.7">${g.body || ''}</div>`, {expr:'calm', min:170}); })()}
+      ${teacherBox(F().abcSay, {expr:'warm'})}
+      ${(()=>{ const g = (UNITS.find(x=>x.id===(L1.unit||F().unit))||{}).grammar || {};
         return g.gloss ? `<div class="card" style="margin-bottom:10px">${g.gloss.map(([de,en])=>`<div class="row" style="gap:8px;padding:4px 0">
  <span style="flex:1.05;min-width:0"><b style="font-size:13px">${esc(de)}</b></span>
  <span style="flex:1.15;font-size:11.5px;color:var(--muted);line-height:1.35">${esc(en)}</span>
@@ -249,7 +260,7 @@ SCREENS.lesson1 = () => {
  <div id="abcFocus" style="margin-bottom:10px"></div>
  <div class="center" id="abcMsg" style="font-size:12px;margin-bottom:8px"><span class="usub">Tap any letter, it teaches you a word.</span></div>
  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:7px" id="abcGrid">
-        ${ALPHABET.map((row,i)=>{ const said = (L1.abcOk||[]).includes(i);
+        ${(F().alphabet||[]).map((row,i)=>{ const said = (L1.abcOk||[]).includes(i);
           return `<button class="chip abcTile${said?' abcDone':''}" id="abc${i}" style="position:relative;flex-direction:column;gap:1px;padding:9px 4px;justify-content:center${said?';border-color:var(--good);background:color-mix(in srgb,var(--good) 10%,var(--card))':''}" onclick="abcPick(${i})">
  <b style="font-size:17px">${row[0]}</b><span style="font-size:9.5px;color:var(--muted)">${row[1]}</span>
  <span class="abcCheck" id="abcOk${i}" style="position:absolute;top:3px;right:5px;font-size:10px;font-weight:800;color:var(--good)">${said?'✓':''}</span>
@@ -257,17 +268,17 @@ SCREENS.lesson1 = () => {
 </div>
  <div id="abcCongrats"></div>
  <div class="grow" style="min-height:10px"></div>
- <button class="btn" id="abcGo" onclick="l1Finish()">${(L1.abcOk||[]).length>=ALPHABET.length?'Perfekt! Finish Lesson 1 ✓':`Finish Lesson 1 (${(L1.abcOk||[]).length}/${ALPHABET.length} said) ✓`}</button>
+ <button class="btn" id="abcGo" onclick="l1Finish()">${(L1.abcOk||[]).length>=(F().alphabet||[]).length?'Well done! Finish the lesson ✓':`Finish Lesson 1 (${(L1.abcOk||[]).length}/${(F().alphabet||[]).length} said) ✓`}</button>
 </div>`;
   }
 
   /* ---------- 6 · ABC SONG · ARCHIVED (not in the flow; call go('lesson1') with L1.step=6 to restore) ---------- */
   else if(st===6){
     app.innerHTML = `<div class="screen noNav">${l1Bar(95,'5/5')}
-      ${teacherBox(`Every German child learns ze ABC to zis melody, ze same one as ze English song. Follow ze letters and sing with me. My voice is… <i>enthusiastic</i>.`, {expr:'happy'})}
+      ${teacherBox(F().songSay, {expr:'happy'})}
  <div class="card center" style="padding:18px 12px">
  <div class="wrap" style="justify-content:center;gap:5px" id="songGrid">
-          ${ALPHABET.slice(0,29).map(([l],i)=>`<span class="songL" id="sl${i}" style="font-family:var(--font-head);font-weight:800;font-size:19px;padding:4px 7px;border-radius:8px;transition:all .18s">${l}</span>`).join('')}
+          ${(F().alphabet||[]).slice(0,29).map(([l],i)=>`<span class="songL" id="sl${i}" style="font-family:var(--font-head);font-weight:800;font-size:19px;padding:4px 7px;border-radius:8px;transition:all .18s">${l}</span>`).join('')}
 </div>
  <button class="btn" style="margin-top:14px" id="songBtn" onclick="l1Song(false)">🎵 Sing the ABC, ${TN()}!</button>
  <button class="btn ghost" style="margin-top:2px" onclick="l1Song(true)">🐢 Sing it slowly</button>
@@ -311,7 +322,7 @@ function l1Heard(txt, isFinal){
       const tgt = L1.speakItems[next];
       fb.className = 'feedback bad';
       fb.innerHTML = `<b>Hmm, I heard „${esc(txt)}".</b> Zat one is tricky! Tap <b>▶</b> before <b>${esc(tgt.de)}</b> to hear me say it, zen read it again. <span style="opacity:.8">(${esc(tgt.en)})</span>
- <div style="margin-top:8px"><button class="chip" style="padding:6px 12px;font-size:12px" onclick="sayEnDe('${tgt.de.replace(/'/g,"\\'")}','${tgt.en.replace(/'/g,"\\'")}')">🔊 English → German</button></div>`;
+ <div style="margin-top:8px"><button class="chip" style="padding:6px 12px;font-size:12px" onclick="sayEnDe('${tgt.de.replace(/'/g,"\\'")}','${tgt.en.replace(/'/g,"\\'")}')">🔊 Hear it</button></div>`;
       const row = document.getElementById('ln'+next);
       if(row){ row.style.borderLeftColor='#F2C14E'; row.style.background='rgba(242,193,78,.16)'; }
       speak(tgt.de, 0.62);
@@ -443,11 +454,15 @@ function l1MicBtn(){
   b.style.color = recOn ? '#fff' : 'var(--hi-ink)';
   b.style.marginBottom = '8px';
 }
-function l1AfterTest(){ l1StopMic(); L1.step = 4; go('lesson1'); }
+function l1AfterTest(){
+  l1StopMic();
+  if(L1.only === 'intro') return l1Finish();   /* no alphabet in this half */
+  L1.step = 4; go('lesson1');
+}
 
 function abcMsgUpdate(){
   const msg = document.getElementById('abcMsg'); if(!msg) return;
-  const said = (L1.abcOk||[]).length, seen = (L1.abc||[]).length, total = ALPHABET.length;
+  const said = (L1.abcOk||[]).length, seen = (L1.abc||[]).length, total = (F().alphabet||[]).length;
   msg.innerHTML = said >= total
     ? `<span style="color:var(--good);font-weight:800">All ${total} letters said correctly ✓</span>`
     : `<span class="usub">${seen}/${total} letters opened · <b style="color:var(--good)">${said}</b> said correctly</span>`;
@@ -460,7 +475,7 @@ function abcSaid(i){
   if(tile){ tile.classList.add('abcDone'); tile.style.borderColor='var(--good)'; tile.style.background='color-mix(in srgb,var(--good) 10%,var(--card))'; }
   if(ok) ok.textContent = '✓';
   abcMsgUpdate();
-  const n = L1.abcOk.length, total = ALPHABET.length;
+  const n = L1.abcOk.length, total = (F().alphabet||[]).length;
   const btn = document.getElementById('abcGo');
   if(btn) btn.textContent = n >= total ? 'Perfekt! Finish Lesson 1 ✓' : `Finish Lesson 1 (${n}/${total} said) ✓`;
   if(n >= total){
@@ -478,7 +493,7 @@ function abcSaid(i){
   }
 }
 function abcPick(i){
-  const [L, name, word, en, pic] = ALPHABET[i];
+  const [L, name, word, en, pic] = (F().alphabet||[])[i];
   L1.abc = L1.abc || [];
   if(!L1.abc.includes(i)) L1.abc.push(i);
   document.querySelectorAll('.abcTile').forEach(t=>{ t.classList.remove('on'); t.style.transform=''; });
@@ -537,7 +552,7 @@ function abcTone(note, dur){
     osc.start(t); osc.stop(t + dur + 0.06);
   }catch(e){}
 }
-function songTileIndex(letter){ return ALPHABET.findIndex(r => r[0] === letter); }
+function songTileIndex(letter){ return (F().alphabet||[]).findIndex(r => r[0] === letter); }
 function l1Song(slow){
   if(singing){ singing = false; speechSynthesis.cancel(); return; }
   singing = true;
@@ -546,8 +561,8 @@ function l1Song(slow){
   const beat = slow ? 0.62 : 0.44;
   let i = 0;
   function step(){
-    if(!singing || i >= ABC_SONG.length) return finish();
-    const [L, note, beats] = ABC_SONG[i];
+    if(!singing || i >= (F().song||[]).length) return finish();
+    const [L, note, beats] = (F().song||[])[i];
     const dur = beat * beats;
     abcTone(note, dur);
     document.querySelectorAll('.songL').forEach(s=>{ s.style.background='transparent'; s.style.color='var(--ink)'; s.style.transform=''; });
@@ -577,12 +592,49 @@ function l1Song(slow){
   step();
 }
 function l1Finish(){
-  unitState('s0a').lesson = true;
-  S.speakTest = {ok:L1.speakOk, total:L1.speakItems.length||8};
-  if(!S.greetTest) S.greetTest = {ok: G?G.done.length:0, total: GREETINGS.length};
+  const uid = L1.unit || F().unit;
+  unitState(uid).lesson = true;
+  if(L1.only !== 'alphabet') S.speakTest = {ok:L1.speakOk, total:L1.speakItems.length||8};
+  if(L1.only !== 'intro' && !S.greetTest) S.greetTest = {ok: G?G.done.length:0, total:(F().greetings||[]).length};
   if(S.intro && S.intro.country) S.country = S.intro.country;
   bumpStreak(); save();
-  const sp = S.speakTest, gr = S.greetTest;
-  const pct = Math.round((sp.ok + gr.ok) / Math.max(1, sp.total + gr.total) * 100);
-  go('checkResult', {kind:'lesson', uid:'s0a', pct, scored:[]});
+  const sp = (L1.only === 'alphabet') ? {ok:0,total:0} : (S.speakTest || {ok:0,total:0});
+  const gr = (L1.only === 'intro')    ? {ok:0,total:0} : (S.greetTest || {ok:0,total:0});
+  const abc = (L1.abcOk||[]).length, abcTotal = (L1.only === 'intro') ? 0 : (F().alphabet||[]).length;
+  const ok = sp.ok + gr.ok + abc, total = Math.max(1, sp.total + gr.total + abcTotal);
+  go('checkResult', {kind:'lesson', uid, pct: Math.round(ok/total*100), scored:[]});
 }
+
+
+/* ================= THE GERMAN FIRST-LESSON PACK =================
+   Everything language-shaped in this file lives here. A second language
+   supplies the same shape and the whole lesson works unchanged.
+   ================================================================ */
+COURSES.de.first = {
+  unit: 's0a',
+  hello: 'Herzlich willkommen!',
+  say: 'Let us start vith ze most useful zing you can own: your own introduction. Fill in ze blanks and it becomes yours.',
+  boardTitle: 'Meine Vorstellung \u00b7 my introduction',
+  greetSay: 'Now ze greetings. <b>Guten Morgen</b> until eleven, <b>Guten Tag</b> until evening, <b>Guten Abend</b> after. <b>Gute Nacht</b> only at bedtime, say it in ze office and zey think you are moving in!',
+  abcSay: 'Tap a letter \u00b7 I say it <i>and</i> give you a word that starts with it. Zirty letters, zirty new words.',
+  abcTitle: 'Das Alphabet',
+  songSay: 'Every German child learns ze ABC to zis melody, ze same one as ze English song. Follow ze letters and sing with me. My voice is\u2026 <i>enthusiastic</i>.',
+  lines: [
+    {de:'Hallo!', en:'Hello!'},
+    {de:'Guten Morgen!', en:'Good morning!'},
+    {pre:'Ich hei\u00dfe ', blank:'name', ph:'your name', post:'.', en:'My name is \u2026'},
+    {pre:'Ich bin ', blank:'age', ph:'age', w:62, post:' Jahre alt.', en:'I am \u2026 years old.'},
+    {pre:'Ich bin ', gender:true, en:'I am a woman / a man \u00b7 tap one, optional'},
+    {pre:'Ich komme aus ', blank:'country', ph:'country', post:'.', en:'I come from \u2026', map:'countries'},
+    {pre:'Ich wohne in ', blank:'city', ph:'your city', w:108, post:'.', en:'I live in \u2026'},
+    {pre:'Ich spreche ', blank:'lang', ph:'language', w:108, post:'.', en:'I speak \u2026', map:'languages'},
+    {de:'Ich lerne Deutsch.', en:'I am learning German.'},
+    {de:'Danke! Tsch\u00fcss!', en:'Thank you! Bye!'}
+  ],
+  gender: L1_GENDER,
+  countries: COUNTRY_DE,
+  languages: LANG_DE,
+  alphabet: ALPHABET,
+  greetings: GREETINGS,
+  song: ABC_SONG
+};

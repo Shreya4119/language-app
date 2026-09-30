@@ -1,7 +1,7 @@
 /* ================= SESSION RUNNER (lesson / check / review / drill) ================= */
 let SES = null;
 function startLesson(uid){
-  if(uid==='s0a') return startLesson1();
+  if(uid === (course().first||{}).unit && !hasTeach(UNITS.find(x=>x.id===uid))) return startLesson1(uid);
   if(uid==='s0f') return startVerbs();
   const uu = UNITS.find(x=>x.id===uid);
   if(hasTeach(uu)) return startTeach(uid);
@@ -21,8 +21,8 @@ function startReview(){
   const items = ids.map((id,i)=>{
     const v = VOCAB[id]; const others = pickOthers(Object.keys(VOCAB).filter(k=>S.words[k]&&S.words[k].seen>0||Math.random()<0.1), id, 2).map(o=>VOCAB[o]);
     return i%2===0
-      ? {t:'mc', q:`Review: „${v.de}" means…`, tts:v.de, opts:shuffle([v.en,...others.map(o=>o.en)]), a:v.en, id, why:`${v.de} = ${v.en}`}
-      : {t:'mc', q:`Review: "${v.en}" auf Deutsch?`, opts:shuffle([v.de,...others.map(o=>o.de)]), a:v.de, id, say:true, why:`${v.en} → ${v.de}`};
+      ? {t:'mc', q:`Review: \u201e${withPyText(v)}" means…`, tts:v.de, opts:shuffle([v.en,...others.map(o=>o.en)]), a:v.en, id, why:`${v.de} = ${v.en}`}
+      : {t:'mc', q:`Review: "${v.en}" in ${course().native}?`, opts:shuffle([v.de,...others.map(o=>o.de)]), a:v.de, id, say:true, why:`${v.en} → ${v.de}`};
   });
   SES = {kind:'review', items, i:0, results:[], title:'Daily review'};
   go('session');
@@ -30,8 +30,8 @@ function startReview(){
 function startDrill(ids, back){
   const items = ids.flatMap(id=>{
     const v = VOCAB[id]; const others = pickOthers(Object.keys(VOCAB), id, 2).map(o=>VOCAB[o]);
-    const arr = [{t:'mc', q:`„${v.de}" means…`, tts:v.de, opts:shuffle([v.en,...others.map(o=>o.en)]), a:v.en, id, why:`${v.de} = ${v.en}`},
-                 {t:'mc', q:`"${v.en}" auf Deutsch?`, opts:shuffle([v.de,...others.map(o=>o.de)]), a:v.de, id, say:true, why:`${v.en} → ${v.de}`}];
+    const arr = [{t:'mc', q:`\u201e${withPyText(v)}" means…`, tts:v.de, opts:shuffle([v.en,...others.map(o=>o.en)]), a:v.en, id, why:`${v.de} = ${v.en}`},
+                 {t:'mc', q:`"${v.en}" in ${course().native}?`, opts:shuffle([v.de,...others.map(o=>o.de)]), a:v.de, id, say:true, why:`${v.en} → ${v.de}`}];
     if(!v.de.includes(' ')) arr.push({t:'dict', id, q:'Type what you hear', tts:v.de.replace(/^(der|die|das) /,''), answer:v.de.replace(/^(der|die|das) /,''), why:`It was: ${v.de}`});
     return arr;
   });
@@ -71,9 +71,10 @@ SCREENS.session = () => {
  <div class="card center" style="padding:30px 18px">
  <div class="tag" style="display:inline-block;margin-bottom:14px">NEW WORD</div>
  <div class="big" style="font-size:30px">${esc(v.de)}</div>
+        ${v.py?`<div class="py" style="font-size:15px;margin-top:4px">${esc(v.py)}</div>`:''}
  <div class="sub" style="margin-top:6px;font-size:16px">${esc(v.en)}</div>
  <div style="display:flex;justify-content:center;margin-top:16px">${sayIt(v.de, {en:v.en})}</div>
- <div class="usub" style="font-size:11px;margin-top:6px">🔊 English → German · 🎤 say it back</div>
+ <div class="usub" style="font-size:11px;margin-top:6px">🔊 English → ${esc(course().native)} · 🎤 say it back</div>
         ${v.ex?`<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:14px"><i>${esc(v.ex[0])}</i><div class="usub" style="margin-top:3px">${esc(v.ex[1])}</div></div>`:''}
 </div></div>
  <button class="btn" onclick="sesNext(true,true)">Next →</button>`;
@@ -100,7 +101,7 @@ SCREENS.session = () => {
  <button class="speak" style="width:60px;height:60px;min-width:60px;background:var(--hi);color:var(--hi-ink);font-size:20px" onclick="speak('${it.tts.replace(/'/g,"\\'")}')">▶</button>
  <div><div style="font-weight:800;font-family:var(--font-head)">Listen carefully</div><div style="font-size:12.5px;opacity:.85">Tap to replay · <span style="text-decoration:underline;cursor:pointer" onclick="speak('${it.tts.replace(/'/g,"\\'")}',0.55)">play slow</span></div></div>
 </div>
- <input type="text" id="dictIn" placeholder="Type the German word…" autocomplete="off" autocapitalize="off">
+ <input type="text" id="dictIn" placeholder="Type the word you hear…" autocomplete="off" autocapitalize="off">
  <div class="row" style="margin-top:10px;gap:7px">${['ä','ö','ü','ß'].map(c=>`<button class="chip" style="min-width:50px;justify-content:center" onclick="insChar('${c}')">${c}</button>`).join('')}<span class="usub" style="margin-left:4px">tap to insert</span></div>
  <div class="feedback" id="fb"></div></div>
  <button class="btn" id="checkBtn" onclick="sesDict()">Check</button>
@@ -213,8 +214,10 @@ SCREENS.checkResult = ({kind, uid, pct, scored}) => {
   const shaky = wordIds.filter(id=>S.words[id] && S.words[id].lv<=1);
   const passed = pct>=70;
   const spk = (kind==='lesson' && uid==='s0a' && S.speakTest)
-    ? ` You read ${S.speakTest.ok}/${S.speakTest.total} introduction lines and ${(S.greetTest||{ok:0}).ok}/${(S.greetTest||{total:9}).total} greetings aloud, all of it out loud, in German.` : '';
-  const headline = kind==='lesson' ? 'Lesson finished!' : passed ? `Note ${note(pct).n} · ${note(pct).de}!` : `Note ${note(pct).n} · not yet`;
+    ? ` You read ${S.speakTest.ok}/${S.speakTest.total} introduction lines and ${(S.greetTest||{ok:0}).ok}/${(S.greetTest||{total:9}).total} greetings aloud, all of it out loud, in ${course().native}.` : '';
+  const headline = kind==='lesson' ? 'Lesson finished!'
+    : passed ? `${note(pct).label} ${note(pct).n} · ${note(pct).de}!`
+             : `${note(pct).label} ${note(pct).n} · not yet`;
   const honest = kind==='lesson' ? 'Now prove it, the check makes it stick.' + spk
     : pct>=90 ? 'Excellent. This unit is genuinely solid.'
     : passed && shaky.length ? `Good, but ${shaky.length} word${shaky.length>1?'s aren\u2019t':' isn\u2019t'} sticking yet. Let\u2019s be honest about ${shaky.length>1?'them':'it'}.`
@@ -224,7 +227,7 @@ SCREENS.checkResult = ({kind, uid, pct, scored}) => {
  <h1 class="center" style="margin-top:8px">${headline}</h1>
  <p class="sub center" style="margin-top:6px">${honest}</p>
     ${(kind==='check' || (kind==='lesson' && uid==='s0a')) ? `<div class="center" style="margin:14px 0 6px">${gradeBadge(pct)}</div>
- <p class="usub center" style="font-size:11.5px;margin-bottom:10px">German schools count backwards: <b>1</b> is the best mark, <b>6</b> the worst.</p>` : ''}
+ <p class="usub center" style="font-size:11.5px;margin-bottom:10px">${(course().grades||{}).legend || ''}</p>` : ''}
  <div class="progress" style="margin:${(kind==='check'||(kind==='lesson'&&uid==='s0a'))?'4px':'16px'} 0 16px"><i style="width:${pct}%;background:${passed?'var(--good)':'var(--warn)'}"></i></div>
     ${wordIds.length?`<div class="sec">Words this session</div>
  <div class="card" style="padding:6px 14px;max-height:230px;overflow-y:auto">

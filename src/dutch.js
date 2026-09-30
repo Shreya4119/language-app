@@ -210,11 +210,12 @@ W('eenbeetje','een beetje','a little',['Ik spreek een beetje Nederlands.','I spe
 NL_UNITS = [
 
 /* ---------------------------------------------------------------- n0a --- */
-{id:'n0a', stage:0, icon:'Aa', title:'Klanken en groeten', sub:'six sounds · hello · thank you',
+{id:'n0a', stage:0, icon:'Aa', title:'Klanken en het alfabet', sub:'six sounds · greetings · 27 letters',
+ practice:'alphabet',
  concept:'Dutch is spelled as it sounds, once you own six sounds English does not have.',
  frame:'Hallo! Dank je wel.',
  brief:{say:'Before any words, six sounds. Get these right now and you will never sound like a tourist.',
-        will:'The six Dutch sounds English does not have, and the greetings you will use every single day.',
+        will:'The six Dutch sounds English does not have, the greetings you will use daily, and all twenty-seven letters.',
         needs:null},
  teach:[
   {m:'hook', say:'Dutch spelling is honest. Every letter is pronounced, and it is always pronounced the same way. The catch is six sounds that do not exist in English at all.',
@@ -292,11 +293,12 @@ NL_UNITS = [
  ]},
 
 /* ---------------------------------------------------------------- n0b --- */
-{id:'n0b', stage:0, icon:'ik', title:'Wie ben jij?', sub:'your introduction · six sentences',
+{id:'n0b', stage:0, icon:'ik', title:'Wie ben jij?', sub:'your introduction · build it, then say it',
+ practice:'intro',
  concept:'Six sentences introduce you for the rest of your life in this country.',
  frame:'Ik heet … Ik kom uit …',
  brief:{say:'Today you build something you will use every week for years. Your own introduction.',
-        will:'Your name, your country, your city, your languages and your age, in Dutch.',
+        will:'Your name, age, country, city and languages in Dutch, written on the board and then read aloud.',
         needs:'Klanken en groeten'},
  teach:[
   {m:'hook', say:'In your first month here you will introduce yourself more times than in the last five years. At the town hall, at the doctor, at the door of a class. Let us make it automatic.',
@@ -1028,10 +1030,140 @@ const NL_CULTURE = [
  {t:'On time means on time', b:'An appointment at 14:00 starts at 14:00. Ten minutes late is late, and fifteen minutes early is also slightly awkward.'}
 ];
 
+
+/* ---- the Dutch first-lesson pack -------------------------------------
+   Same shape as COURSES.de.first, so lesson1.js runs it unchanged.
+   Word ids carry the nl- prefix because the pack namespaces them. */
+const NL_ALPHABET = [
+ ['A','aa','de appel','the apple','\u{1F34E}'],
+ ['B','bee','de banaan','the banana','\u{1F34C}'],
+ ['C','see','de computer','the computer','\u{1F4BB}'],
+ ['D','dee','de deur','the door','\u{1F6AA}'],
+ ['E','ee','het ei','the egg','\u{1F95A}'],
+ ['F','ef','de fiets','the bicycle','\u{1F6B2}'],
+ ['G','gee','het glas','the glass','\u{1F943}'],
+ ['H','haa','het huis','the house','\u{1F3E0}'],
+ ['I','ie','het idee','the idea','\u{1F4A1}'],
+ ['J','jee','de jas','the coat','\u{1F9E5}'],
+ ['K','kaa','de kat','the cat','\u{1F408}'],
+ ['L','el','de lamp','the lamp','\u{1F6CB}'],
+ ['M','em','de maan','the moon','\u{1F319}'],
+ ['N','en','de nacht','the night','\u{1F303}'],
+ ['O','oo','het oog','the eye','\u{1F441}'],
+ ['P','pee','het paard','the horse','\u{1F434}'],
+ ['Q','kuu','de quiz','the quiz','❓'],
+ ['R','er','de regen','the rain','\u{1F327}'],
+ ['S','es','de stoel','the chair','\u{1FA91}'],
+ ['T','tee','de trein','the train','\u{1F686}'],
+ ['U','uu','het uur','the hour','⏰'],
+ ['V','vee','de vis','the fish','\u{1F41F}'],
+ ['W','wee','het water','the water','\u{1F4A7}'],
+ ['X','iks','de taxi','the taxi','\u{1F695}'],
+ ['Y','Griekse ij','de yoghurt','the yoghurt','\u{1F963}'],
+ ['Z','zet','de zon','the sun','☀'],
+ ['IJ','lange ij','het ijs','the ice cream','\u{1F366}']
+];
+
+const NL_GREETINGS = [
+  ['Hallo','hello','anytime, anyone','nl-hallo'],
+  ['Goedemorgen','good morning','until about noon','nl-goedemorgen'],
+  ['Goedemiddag','good afternoon','noon until about six','nl-goedemiddag'],
+  ['Goedenavond','good evening','after about six','nl-goedenavond'],
+  ['Welterusten','sleep well','only at bedtime',''],
+  ['Dank je wel','thank you','informal','nl-dankjewel'],
+  ['Alsjeblieft','please, and here you are','informal','nl-alsjeblieft'],
+  ['Doei','bye','informal','nl-doei'],
+  ['Tot ziens','goodbye','formal','nl-totziens']
+];
+
+const NL_COUNTRIES = {'india':'India','germany':'Duitsland','netherlands':'Nederland','holland':'Nederland',
+ 'belgium':'België','france':'Frankrijk','spain':'Spanje','italy':'Italië','turkey':'Turkije','poland':'Polen',
+ 'usa':'de Verenigde Staten','united states':'de Verenigde Staten','america':'de Verenigde Staten',
+ 'uk':'het Verenigd Koninkrijk','england':'Engeland','scotland':'Schotland','ireland':'Ierland',
+ 'china':'China','japan':'Japan','brazil':'Brazilië','mexico':'Mexico','russia':'Rusland',
+ 'ukraine':'Oekraïne','syria':'Syrië','iran':'Iran','iraq':'Irak','pakistan':'Pakistan','vietnam':'Vietnam',
+ 'south korea':'Zuid-Korea','korea':'Korea','greece':'Griekenland','portugal':'Portugal','austria':'Oostenrijk',
+ 'switzerland':'Zwitserland','sweden':'Zweden','norway':'Noorwegen','denmark':'Denemarken','finland':'Finland',
+ 'canada':'Canada','australia':'Australië','egypt':'Egypte','morocco':'Marokko','nigeria':'Nigeria',
+ 'kenya':'Kenia','indonesia':'Indonesië','thailand':'Thailand','philippines':'de Filipijnen',
+ 'bangladesh':'Bangladesh','sri lanka':'Sri Lanka','nepal':'Nepal','afghanistan':'Afghanistan','israel':'Israël',
+ 'romania':'Roemenië','bulgaria':'Bulgarije','hungary':'Hongarije','czech republic':'Tsjechië',
+ 'croatia':'Kroatië','serbia':'Servië','albania':'Albanië','colombia':'Colombia',
+ 'argentina':'Argentinië','chile':'Chili','peru':'Peru'};
+
+const NL_LANGUAGES = {'english':'Engels','hindi':'Hindi','marathi':'Marathi','gujarati':'Gujarati','tamil':'Tamil',
+ 'telugu':'Telugu','bengali':'Bengaals','urdu':'Urdu','punjabi':'Punjabi','arabic':'Arabisch','turkish':'Turks',
+ 'spanish':'Spaans','french':'Frans','italian':'Italiaans','portuguese':'Portugees','russian':'Russisch',
+ 'ukrainian':'Oekraïens','polish':'Pools','romanian':'Roemeens','chinese':'Chinees','mandarin':'Chinees',
+ 'japanese':'Japans','korean':'Koreaans','vietnamese':'Vietnamees','thai':'Thai','indonesian':'Indonesisch',
+ 'persian':'Perzisch','farsi':'Perzisch','dutch':'Nederlands','german':'Duits','greek':'Grieks','swedish':'Zweeds',
+ 'serbian':'Servisch','croatian':'Kroatisch','albanian':'Albanees','somali':'Somalisch','swahili':'Swahili',
+ 'filipino':'Tagalog','tagalog':'Tagalog','nepali':'Nepalees','sinhala':'Singalees','pashto':'Pasjtoe',
+ 'kurdish':'Koerdisch','hebrew':'Hebreeuws','czech':'Tsjechisch','hungarian':'Hongaars','bulgarian':'Bulgaars'};
+
+const NL_SONG = [
+ ['A','C',1],['B','C',1],['C','G',1],['D','G',1],['E','A',1],['F','A',1],['G','G',2],
+ ['H','F',1],['I','F',1],['J','E',1],['K','E',1],['L','D',1],['M','D',1],['N','D',1],['O','D',1],['P','C',2],
+ ['Q','G',1],['R','G',1],['S','F',2],
+ ['T','E',1],['U','E',1],['V','D',2],
+ ['W','G',1],['X','G',1],['Y','F',1],['Z','E',2]
+];
+
+const NL_FIRST = {
+  unit: 'n0b',
+  hello: 'Hallo!',
+  say: 'Let us start with the most useful thing you can own: your own introduction. Fill in the blanks and it becomes yours.',
+  boardTitle: 'Mijn introductie · my introduction',
+  greetSay: 'Now the greetings, and Dutch splits the day carefully. <b>Goedemorgen</b> until noon, <b>Goedemiddag</b> until about six, <b>Goedenavond</b> after that. <b>Welterusten</b> only at bedtime, and only to someone actually going to bed.',
+  abcSay: 'Tap a letter and I will say it, with a word that starts with it. Twenty-seven letters, because <b>ij</b> counts as one.',
+  abcTitle: 'Het alfabet',
+  songSay: 'Dutch children learn the alphabet to the same melody as the English song. Follow the letters and sing along.',
+  lines: [
+    {de:'Hallo!', en:'Hello!'},
+    {de:'Goedemorgen!', en:'Good morning!'},
+    {pre:'Ik heet ', blank:'name', ph:'your name', post:'.', en:'My name is …'},
+    {pre:'Ik ben ', blank:'age', ph:'age', w:62, post:' jaar oud.', en:'I am … years old.'},
+    {pre:'Ik ben ', gender:true, en:'I am a woman / a man · tap one, optional'},
+    {pre:'Ik kom uit ', blank:'country', ph:'country', post:'.', en:'I come from …', map:'countries'},
+    {pre:'Ik woon in ', blank:'city', ph:'your city', w:108, post:'.', en:'I live in …'},
+    {pre:'Ik spreek ', blank:'lang', ph:'language', w:108, post:'.', en:'I speak …', map:'languages'},
+    {de:'Ik leer Nederlands.', en:'I am learning Dutch.'},
+    {de:'Dank je wel! Tot ziens!', en:'Thank you! Goodbye!'}
+  ],
+  gender: {f:{de:'een vrouw', en:'a woman'}, m:{de:'een man', en:'a man'}, d:{de:'een persoon', en:'a person'}},
+  countries: NL_COUNTRIES,
+  languages: NL_LANGUAGES,
+  alphabet: NL_ALPHABET,
+  greetings: NL_GREETINGS,
+  song: NL_SONG
+};
+
 /* register with the course table declared in content.js */
 COURSES.nl = {vocab:NL_VOCAB, units:NL_UNITS, stages:NL_STAGES, teacher:SANNE,
               stories:[], scenarios:[], culture:NL_CULTURE,
+              /* no Dutch exam authored yet. Null hides the Test tab rather
+                 than showing a German paper inside the Dutch course. */
+              mock:null, exam:null, first:NL_FIRST,
+              skillNames:{reading:'Lezen \u00b7 Reading', listening:'Luisteren \u00b7 Dictation',
+                          writing:'Schrijven \u00b7 Writing', speaking:'Spreken \u00b7 Speaking'},
+              source:'vocabulary and grammar sourced from Shetter & Ham, Welkom in Nederland and Teach Yourself Dutch',
+              /* Dutch schools mark out of 10, and 10 is famously almost never given. */
+              grades:{note:'Cijfer', best:10, legend:'Dutch schools mark out of <b>10</b>, and a <b>5.5</b> is a pass. A 10 is famously almost never given.',
+                scale:[[95,10,'uitmuntend','outstanding'],[88,9,'zeer goed','very good'],[80,8,'goed','good'],
+                       [70,7,'ruim voldoende','more than sufficient'],[55,6,'voldoende','sufficient'],
+                       [40,5,'onvoldoende','not sufficient'],[0,4,'zwak','weak']]},
               voice:'nl-NL', native:'Nederlands', slug:'dutch',
               greet:['Goedemorgen', 'Hallo', 'Goedenavond'],
-              gogo:'Daar gaan we!'};
+              gogo:'Daar gaan we!',
+              /* Two buckets instead of three, same game. The two-thirds figure
+                 is Shetter & Ham §4.1, not an estimate. */
+              genders:{name:'de of het', sub:'Two articles, 12 rounds, from your own words',
+                buckets:['de','het'],
+                hint:'Roughly two thirds of Dutch nouns are de, so de is the better guess when you have nothing to go on. Every plural is de.',
+                allRight:'De and het is the thing Dutch learners never stop getting wrong, and you just took twelve without a miss.',
+                rules:[
+                  ['je$','het','Every diminutive ends in -je, and every diminutive is het. This is the one gender rule in Dutch that never fails.'],
+                  ['(ing|heid|teit|tie)$','de','-ing, -heid, -teit and -tie are always de.'],
+                  ['en$','de','Plurals are always de, whatever the singular was: het huis, de huizen.'],
+                  ['^ge','het','Many ge- nouns are het.']]}};
 })();

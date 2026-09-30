@@ -27,21 +27,38 @@ function bumpStreak(){
   S.lastDay = t; save();
 }
 
-/* ---- grading: German school Noten (1 best … 6 worst) ---- */
+/* ---- grading, on the school scale of the country you are learning for ----
+   German counts backwards (1 best, 6 worst). Dutch marks out of 10.
+   The scale lives in the course pack; this just reads it. */
+const NOTE_DE = {note:'Note', best:1,
+  scale:[[92,1,'sehr gut','very good'],[81,2,'gut','good'],[67,3,'befriedigend','satisfactory'],
+         [50,4,'ausreichend','sufficient'],[30,5,'mangelhaft','weak'],[0,6,'ungenügend','not yet']]};
+function gradeScale(){ return (typeof course === 'function' && course().grades) || NOTE_DE; }
 function note(pct){
-  if(pct>=92) return {n:1, de:'sehr gut', en:'very good'};
-  if(pct>=81) return {n:2, de:'gut', en:'good'};
-  if(pct>=67) return {n:3, de:'befriedigend', en:'satisfactory'};
-  if(pct>=50) return {n:4, de:'ausreichend', en:'sufficient'};
-  if(pct>=30) return {n:5, de:'mangelhaft', en:'weak'};
-  return {n:6, de:'ungenügend', en:'not yet'};
+  const g = gradeScale();
+  for(let i = 0; i < g.scale.length; i++){
+    const [min, n, native, en] = g.scale[i];
+    if(pct >= min) return {n, de:native, en, label:g.note, i, of:g.scale.length};
+  }
+  const i = g.scale.length - 1, last = g.scale[i];
+  return {n:last[1], de:last[2], en:last[3], label:g.note, i, of:g.scale.length};
 }
-function noteColor(n){ return n<=2 ? 'var(--good)' : n<=4 ? 'var(--warn)' : 'var(--bad)'; }
+/* passed = in the better half of whatever scale is in use */
+function notePassed(pct){ const n = note(pct); return n.i < Math.ceil(n.of / 2); }
+/* a mark is "good" when it is nearer the best end of whichever scale is in use */
+/* colour by how near the mark is to the best end of whichever scale is in use */
+/* Colour by position in the scale rather than by the mark's value: a Chinese
+   \u4f18 is a top mark and a German 1 is a top mark, and neither is comparable
+   as a number. */
+function noteColor(i, of){
+  const frac = 1 - (i / Math.max(1, (of || 1) - 1));   /* 1 = best band, 0 = worst */
+  return frac >= 0.7 ? 'var(--good)' : frac >= 0.4 ? 'var(--warn)' : 'var(--bad)';
+}
 function gradeBadge(pct){
   const g = note(pct);
-  return `<span class="grade"><span class="n" style="color:${noteColor(g.n)}">${g.n}</span>
+  return `<span class="grade"><span class="n" style="color:${noteColor(g.i, g.of)}">${esc(String(g.n))}</span>
  <span style="line-height:1.25"><b style="font-size:13px">${g.de}</b>
- <div class="usub" style="font-size:10.5px">Note ${g.n} · ${pct}%</div></span></span>`;
+ <div class="usub" style="font-size:10.5px">${esc(g.label)} ${g.n} · ${pct}%</div></span></span>`;
 }
 /* ---- A1 readiness: the honest north star ---- */
 function a1Readiness(){
@@ -145,6 +162,7 @@ let deVoice = null;
 const VOICE_PREF = {
   de: ['Google Deutsch','Google Deutsch (Deutschland)','Microsoft Katja','Microsoft Seraphina','Anna','Petra','Helena'],
   nl: ['Google Nederlands','Microsoft Frank','Microsoft Fenna','Xander','Ellen','Claire','Lotte'],
+  zh: ['Google 普通话','Google Chinese','Microsoft Xiaoxiao','Microsoft Huihui','Tingting','Ting-Ting'],
   fr: ['Google français','Amelie','Thomas'],
   es: ['Google español','Monica','Jorge']
 };
@@ -264,6 +282,18 @@ function speakBtns(text, small){
 /* ---- German only: the English is on screen, no need to hear it ---- */
 function sayEnDe(de, en){ return speak(de); }
 
+/* ---- a second written form, for languages that need one ----
+   Mandarin shows the characters and the pinyin together: characters alone
+   cannot be pronounced, pinyin alone never teaches reading. Languages with
+   one written form have no `py` and nothing changes for them. */
+function pyLine(v, size){
+  if(!v || !v.py) return '';
+  return `<div class="py" style="font-size:${size||11.5}px">${esc(v.py)}</div>`;
+}
+function withPy(v){ return v && v.py ? `${esc(v.de)} <span class="pyi">${esc(v.py)}</span>` : esc(v && v.de || ''); }
+/* plain-text version, for question strings that are escaped downstream */
+function withPyText(v){ return v && v.py ? `${v.de} (${v.py})` : (v && v.de || ''); }
+
 /* ---- toast ---- */
 function toast(msg){
   const t = document.createElement('div'); t.className='toast'; t.textContent=msg;
@@ -281,7 +311,10 @@ function go(name, arg){
   SCREENS[name](arg);
 }
 function navBar(active){
-  const items = [['home','🗺','Path'],['skills','🎧','Skills'],['scenes','💬','Scenes'],['test','📋','Test'],['me','👤','Me']];
+  const items = [['home','🗺','Path'],['skills','🎧','Skills']];
+  if(hasScenes()) items.push(['scenes','💬','Scenes']);
+  if(hasMock())   items.push(['test','📋','Test']);
+  items.push(['me','👤','Me']);
   return `<div class="nav">` + items.map(([id,ic,lb]) =>
  `<button class="${active===id?'on':''}" onclick="go('${id}')"><span class="ic">${ic}</span>${lb}</button>`).join('') + `</div>`;
 }
@@ -302,7 +335,7 @@ function buildLesson(unit){
   vocab.forEach((id,i)=>{
     const v = VOCAB[id];
     const others = pickOthers(vocab, id, 2).map(o=>VOCAB[o]);
-    if(i%3===0) drills.push({t:'mc', q:`What does „${v.de}" mean?`, tts:v.de, opts:shuffle([v.en, ...others.map(o=>o.en)]), a:v.en, id, why:`${v.de} = ${v.en}`});
+    if(i%3===0) drills.push({t:'mc', q:`What does \u201e${withPyText(v)}" mean?`, tts:v.de, opts:shuffle([v.en, ...others.map(o=>o.en)]), a:v.en, id, why:`${v.de} = ${v.en}`});
     else if(i%3===1) drills.push({t:'mc', q:`How do you say "${v.en}"?`, opts:shuffle([v.de, ...others.map(o=>o.de)]), a:v.de, id, say:true, why:`${v.en} → ${v.de}`});
     else drills.push({t:'dict', id, q:'Listen and type what you hear', tts:v.de.replace(/^(der|die|das) /,''), answer:v.de.replace(/^(der|die|das) /,''), why:`It was: ${v.de} (${v.en})`});
   });
@@ -319,8 +352,8 @@ function buildCheck(unit){
   shuffle(vocab).slice(0,5).forEach((id,i)=>{
     const v = VOCAB[id];
     const others = pickOthers(vocab, id, 2).map(o=>VOCAB[o]);
-    if(i%2===0) qs.push({t:'mc', q:`„${v.de}" means…`, opts:shuffle([v.en, ...others.map(o=>o.en)]), a:v.en, id, why:`${v.de} = ${v.en}`});
-    else qs.push({t:'mc', q:`"${v.en}" auf Deutsch?`, opts:shuffle([v.de, ...others.map(o=>o.de)]), a:v.de, id, why:`${v.en} → ${v.de}`});
+    if(i%2===0) qs.push({t:'mc', q:`\u201e${withPyText(v)}" means…`, opts:shuffle([v.en, ...others.map(o=>o.en)]), a:v.en, id, why:`${v.de} = ${v.en}`});
+    else qs.push({t:'mc', q:`"${v.en}" in ${course().native}?`, opts:shuffle([v.de, ...others.map(o=>o.de)]), a:v.de, id, why:`${v.en} → ${v.de}`});
   });
   (unit.extra||[]).forEach(e=>qs.push(normEx(e)));
   const d = shuffle(vocab.filter(id=>!VOCAB[id].de.includes(' ')))[0];
@@ -409,7 +442,7 @@ function sayIt(text, opts){
   const enTxt = opts.en ? opts.en.replace(/'/g,"\\'") : '';
   const playFn = opts.en ? `sayEnDe('${esc2}','${enTxt}')` : `speak('${esc2}')`;
   return `<span class="sayit" id="si_${uid}">
-    ${opts.noPlay ? '' : `<button class="ico" style="${dk}" onclick="${playFn}" title="${opts.en?'listen · English, then German':'listen'}">🔊</button>`}
+    ${opts.noPlay ? '' : `<button class="ico" style="${dk}" onclick="${playFn}" title="${opts.en?'listen':'listen'}">🔊</button>`}
     ${hasMic()?`<button class="ico mic" style="${dkM}" id="mic_${uid}" onclick="micLine('${uid}','${esc2}',${opts.loose?'true':'false'})" title="say it · I'll listen">🎤</button>`:''}
  <span class="tickmark" id="tk_${uid}" style="${opts.dark?'color:#8FE3A8':''}"></span></span>`;
 }

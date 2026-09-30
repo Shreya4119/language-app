@@ -1,17 +1,19 @@
 /* ================= SKILLS HUB ================= */
 SCREENS.skills = () => {
   const seen = Object.keys(S.words).filter(id=>S.words[id].seen>0 && VOCAB[id]);
+  const sk = course().skillNames || {reading:'Reading', listening:'Listening', writing:'Writing', speaking:'Speaking'};
   app.innerHTML = `<div class="screen">
  <h1 style="font-size:23px">Skills Studio</h1>
- <p class="sub" style="margin-top:4px">The four exam skills, practice what's weakest.</p>
+ <p class="sub" style="margin-top:4px">${hasMock() ? 'The four exam skills, practice what\u2019s weakest.' : 'Practise whichever is weakest.'}</p>
  <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
- <div class="pathRow" onclick="go('stories')"><div class="badge" style="background:var(--tint)">📖</div><div class="grow"><div class="uname">Lesen · Reading</div><div class="usub">Stories with tap-to-translate + questions</div></div><span style="color:var(--accent);font-weight:800">→</span></div>
- <div class="pathRow ${seen.length>=5?'':'locked'}" ${seen.length>=5?`onclick="startDictSprint()"`:''}><div class="badge" style="background:var(--tint)">🎧</div><div class="grow"><div class="uname">Hören & Diktat</div><div class="usub">${seen.length>=5?'Listen-and-type sprint from your words':'Learn 5+ words to unlock'}</div></div>${seen.length>=5?'<span style="color:var(--accent);font-weight:800">→</span>':'<span>🔒</span>'}</div>
- <div class="pathRow" onclick="go('writing')"><div class="badge" style="background:var(--tint)">✍️</div><div class="grow"><div class="uname">Schreiben · Writing</div><div class="usub">Exam-style short message (30-40 words)</div></div><span style="color:var(--accent);font-weight:800">→</span></div>
- <div class="pathRow" onclick="go('speaking')"><div class="badge" style="background:var(--tint)">🗣</div><div class="grow"><div class="uname">Sprechen · Speaking</div><div class="usub">Self-introduction drill (exam part 1)</div></div><span style="color:var(--accent);font-weight:800">→</span></div>
+        ${hasStories() ? `<div class="pathRow" onclick="go('stories')"><div class="badge" style="background:var(--tint)">📖</div><div class="grow"><div class="uname">${esc(sk.reading)}</div><div class="usub">Stories with tap-to-translate + questions</div></div><span style="color:var(--accent);font-weight:800">→</span></div>` : ''}
+ <div class="pathRow ${seen.length>=5?'':'locked'}" ${seen.length>=5?`onclick="startDictSprint()"`:''}><div class="badge" style="background:var(--tint)">🎧</div><div class="grow"><div class="uname">${esc(sk.listening)}</div><div class="usub">${seen.length>=5?'Listen-and-type sprint from your words':'Learn 5+ words to unlock'}</div></div>${seen.length>=5?'<span style="color:var(--accent);font-weight:800">→</span>':'<span>🔒</span>'}</div>
+ <div class="pathRow" onclick="go('writing')"><div class="badge" style="background:var(--tint)">✍️</div><div class="grow"><div class="uname">${esc(sk.writing)}</div><div class="usub">Exam-style short message (30-40 words)</div></div><span style="color:var(--accent);font-weight:800">→</span></div>
+ <div class="pathRow" onclick="go('speaking')"><div class="badge" style="background:var(--tint)">🗣</div><div class="grow"><div class="uname">${esc(sk.speaking)}</div><div class="usub">Self-introduction drill (exam part 1)</div></div><span style="color:var(--accent);font-weight:800">→</span></div>
+      ${gameList().length ? `<div class="pathRow" onclick="go('games')"><div class="badge" style="background:var(--tint)">🎲</div><div class="grow"><div class="uname">Games</div><div class="usub">${esc(gameList()[0].name)}${gameList().length>1?` and ${gameList().length-1} more`:''} · built from your own words</div></div><span style="color:var(--accent);font-weight:800">→</span></div>` : ''}
 </div>
- <div class="sec">Tip</div>
- <div class="card"><p style="font-size:13.5px;line-height:1.55">Scenario practice (💬 Scenes tab) trains listening <i>and</i> speaking at once, it's the closest thing to real life in the app.</p></div>
+    ${hasScenes() ? `<div class="sec">Tip</div>
+ <div class="card"><p style="font-size:13.5px;line-height:1.55">Scenario practice (💬 Scenes tab) trains listening <i>and</i> speaking at once, it's the closest thing to real life in the app.</p></div>` : ''}
   ${navBar('skills')}</div>`;
 };
 function startDictSprint(){
@@ -138,7 +140,7 @@ SCREENS.speaking = () => {
 SCREENS.scenes = () => {
   app.innerHTML = `<div class="screen">
  <h1 style="font-size:23px">Scenario practice</h1>
- <p class="sub" style="margin-top:4px">Real situations, real German. Wrong answers don't fail you, locals just react like locals.</p>
+ <p class="sub" style="margin-top:4px">Real situations, real ${course().native}. Wrong answers don't fail you, locals just react like locals.</p>
  <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
     ${SCENARIOS.map(sc=>{
       const stt = S.scenarios[sc.id];
@@ -152,7 +154,7 @@ SCREENS.scenes = () => {
  <div class="sec">Assist level</div>
  <div class="row">
  <button class="chip ${!S.noHints?'on':''}" onclick="S.noHints=false;save();go('scenes')">Hints ON (English shown)</button>
- <button class="chip ${S.noHints?'on':''}" onclick="S.noHints=true;save();go('scenes')">German only</button>
+ <button class="chip ${S.noHints?'on':''}" onclick="S.noHints=true;save();go('scenes')">${esc(course().native)} only</button>
 </div>
   ${navBar('scenes')}</div>`;
 };

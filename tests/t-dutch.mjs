@@ -3,6 +3,9 @@
    `het huis` teaches the wrong pronunciation, which is worse than silence. */
 import { chromium } from 'playwright';
 const BASE = process.env.SPRAK_URL || 'http://localhost:4173';
+/* Dutch and Mandarin are parked: LIVE_LANGS is ['de']. The preview flag is
+   how a parked pack stays reachable, and therefore testable. */
+const ALL = BASE + (BASE.includes('?') ? '&' : '?') + 'langs=all';
 const b = await chromium.launch({...(process.env.CHROME_PATH ? {executablePath: process.env.CHROME_PATH} : {})});
 const p = await b.newPage({ viewport:{width:390,height:844}, deviceScaleFactor:2 });
 const errs=[]; p.on('console',m=>{if(m.type()==='error')errs.push(m.text())}); p.on('pageerror',e=>errs.push('PAGEERR '+e.message));
@@ -17,7 +20,7 @@ await p.addInitScript(()=>{
     set onvoiceschanged(f){}, get onvoiceschanged(){return null} };
   Object.defineProperty(window,'speechSynthesis',{value:mock,configurable:true,writable:true});
 });
-await p.goto(BASE); await p.waitForTimeout(300);
+await p.goto(ALL); await p.waitForTimeout(300);
 
 /* ---- 1 · Dutch is offered, not greyed out ---- */
 const rows = await p.$$eval('.pathRow', els => els.map(e => ({t:e.textContent.replace(/\s+/g,' ').trim(), locked:e.classList.contains('locked')})));
@@ -88,6 +91,48 @@ const badLang = said.filter(s=>s.lang!=='nl-NL');
 console.log('utterances in unit :', said.length, '| any not nl-NL:', badLang.length ? badLang.map(s=>s.lang) : 'none');
 await p.screenshot({path:'tests/shots/nl-teach.png', fullPage:true});
 
+/* ---- 4b · n0a ends in the alphabet drill, not multiple choice ---- */
+await p.evaluate(()=>{ startLesson('n0a'); }); await p.waitForTimeout(600);
+await p.evaluate(()=>{ const u=UNITS.find(x=>x.id==='n0a');
+  TCH={uid:'n0a', i:u.teach.length-1, answered:{}}; go('teachMove'); }); await p.waitForTimeout(400);
+await p.evaluate(()=>tchNext()); await p.waitForTimeout(600);
+const alpha = await p.evaluate(()=>({ screen: currentScreen, step: L1&&L1.step, only: L1&&L1.only,
+  unit: L1&&L1.unit, letters: (course().first.alphabet||[]).length, greetings: (course().first.greetings||[]).length }));
+const alphaTxt = (await p.textContent('.screen')).replace(/\s+/g,' ');
+console.log('\nn0a practice       :', JSON.stringify(alpha));
+console.log('  greetings shown  :', alphaTxt.includes('Goedemorgen') && alphaTxt.includes('Welterusten'));
+await p.screenshot({path:'tests/shots/nl-greetings.png', fullPage:true});
+await p.evaluate(()=>{ L1.step=5; go('lesson1'); }); await p.waitForTimeout(500);
+const abcTxt = (await p.textContent('.screen')).replace(/\s+/g,' ');
+const tiles = await p.locator('.abcTile').count();
+console.log('  alphabet tiles   :', tiles, '| has IJ:', abcTxt.includes('lange ij'), '| no German letters:', !/\u00e4|\u00f6|\u00fc|\u00df/.test(abcTxt));
+await p.screenshot({path:'tests/shots/nl-alphabet.png', fullPage:true});
+
+/* ---- 4c · n0b ends in the introduction board ---- */
+await p.evaluate(()=>{ const u=UNITS.find(x=>x.id==='n0b');
+  TCH={uid:'n0b', i:u.teach.length-1, answered:{}}; go('teachMove'); }); await p.waitForTimeout(400);
+await p.evaluate(()=>tchNext()); await p.waitForTimeout(600);
+const boardTxt = (await p.textContent('.screen')).replace(/\s+/g,' ');
+const intro = await p.evaluate(()=>({ step:L1&&L1.step, only:L1&&L1.only, unit:L1&&L1.unit }));
+console.log('n0b practice       :', JSON.stringify(intro));
+console.log('  Dutch board      :', boardTxt.includes('Mijn introductie') && boardTxt.includes('Ik heet'));
+console.log('  no German lines  :', !boardTxt.includes('Ich hei') && !boardTxt.includes('Guten Morgen'));
+console.log('  blanks + chips   :', await p.locator('input[type=text]').count(), '+', await p.locator('.gchip').count());
+await p.screenshot({path:'tests/shots/nl-intro-board.png', fullPage:true});
+
+/* fill it in and read it aloud */
+for(const [id,v] of [['b_name','Shreya'],['b_age','27'],['b_country','India'],['b_city','Amsterdam'],['b_lang','Engels']]) await p.fill('#'+id,v);
+await p.click('#g_f'); await p.waitForTimeout(300);
+await p.click('#l1go'); await p.waitForTimeout(500);
+const spoken2 = (await p.textContent('.screen')).replace(/\s+/g,' ');
+const lineCount = await p.locator('.linerow').count();
+console.log('  speaking lines   :', lineCount);
+console.log('  name in Dutch    :', spoken2.includes('Ik heet Shreya'));
+console.log('  country mapped   :', spoken2.includes('Ik kom uit India'));
+console.log('  age line         :', spoken2.includes('27 jaar oud'));
+console.log('  gender line      :', spoken2.includes('een vrouw'));
+await p.screenshot({path:'tests/shots/nl-speak.png', fullPage:true});
+
 /* ---- 5 · switching back restores German, and progress is kept apart ---- */
 await p.evaluate(()=>{ S.units=S.units||{}; S.units['n0a']={lesson:true,check:90,doneDay:today()}; save(); pickLang('de'); }); await p.waitForTimeout(600);
 const back = await p.evaluate(()=>({
@@ -154,6 +199,13 @@ if(!back.dutchProgressKept) bad.push('Dutch progress lost on switch');
 if(bleed.leaked.length) bad.push('German SRS progress leaked into Dutch: '+bleed.leaked.join(', '));
 if(bleed.nlWords !== 0) bad.push('Dutch word count polluted by German progress');
 if(noVoice.fellBackToGerman) bad.push('fell back to a German voice for Dutch');
+if(alpha.only !== 'alphabet') bad.push('n0a did not hand off to the alphabet drill');
+if(alpha.letters !== 27) bad.push('Dutch alphabet is not 27 letters, got ' + alpha.letters);
+if(tiles !== 27) bad.push('alphabet grid rendered ' + tiles + ' tiles');
+if(intro.only !== 'intro') bad.push('n0b did not hand off to the introduction board');
+if(!boardTxt.includes('Ik heet')) bad.push('introduction board is not in Dutch');
+if(!spoken2.includes('Ik kom uit India')) bad.push('country was not mapped into Dutch');
+if(lineCount !== 10) bad.push('expected 10 introduction lines, got ' + lineCount);
 if(!warned) bad.push('no warning shown when the device has no Dutch voice');
 console.log('ERRORS:', bad.length ? bad : 'none 🎉');
 await b.close();

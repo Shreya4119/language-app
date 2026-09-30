@@ -544,9 +544,36 @@ const FACTS = [
 const COURSES = {
   de: {vocab: Object.assign({}, VOCAB), units: UNITS.slice(), stages: STAGES.slice(),
        stories: STORIES.slice(), scenarios: SCENARIOS.slice(), culture: CULTURE.slice(),
+       mock: MOCKTEST, exam: {name:'Goethe A1', real:'Start Deutsch 1', pass:60,
+         modules:[['Hören','~20 min','pictures, true/false, key details'],
+                  ['Lesen','25 min','signs, notices, short texts'],
+                  ['Schreiben','20 min','form + 30-40-word message'],
+                  ['Sprechen','15 min','introduce yourself, Q&A, requests']]},
+       skillNames: {reading:'Lesen · Reading', listening:'Hören & Diktat',
+                    writing:'Schreiben · Writing', speaking:'Sprechen · Speaking'},
+       source: 'vocabulary sourced from the official Goethe A1 Wortliste',
+       /* German schools count backwards: 1 is best, 6 worst. */
+       grades: {note:'Note', best:1, legend:'German schools count backwards: <b>1</b> is the best mark, <b>6</b> the worst.',
+         scale:[[92,1,'sehr gut','very good'],[81,2,'gut','good'],[67,3,'befriedigend','satisfactory'],
+                [50,4,'ausreichend','sufficient'],[30,5,'mangelhaft','weak'],[0,6,'ungen\u00fcgend','not yet']]},
        voice: 'de-DE', native: 'Deutsch', slug: 'german',
        greet: ['Guten Morgen', 'Hallo', 'Guten Abend'],
-       gogo: 'Los geht\u2019s!'}
+       gogo: 'Los geht\u2019s!',
+       /* The gender game reads this and nothing else. A rule only ever
+          appears next to a noun it is actually true of, so an over-broad
+          pattern can never teach the wrong thing. */
+       genders: {name:'der, die, das', sub:'Sort your own nouns by gender, 12 rounds',
+         buckets:['der','die','das'],
+         hint:'Learn every noun WITH its article, never on its own. A noun learned bare is learned wrong.',
+         allRight:'Gender is the hardest thing in German and you just took twelve of them without a miss.',
+         rules:[
+           ['ung$','die','Every noun ending in -ung is die. That one is safe to rely on.'],
+           ['(heit|keit|schaft)$','die','-heit, -keit and -schaft are always die.'],
+           ['(ion|t\u00e4t|ie)$','die','-ion, -t\u00e4t and -ie are die, and they are usually the same word in English.'],
+           ['(chen|lein)$','das','A diminutive is das, whatever the original noun was. Das M\u00e4dchen is the famous one.'],
+           ['tag$','der','Days, months and seasons are all der.'],
+           ['e$','die','Most nouns ending in -e are die. Not all, but it is the right guess.'],
+           ['^Ge','das','Many Ge- nouns are das.']]}}
 };
 
 function loadCourse(lang){
@@ -560,10 +587,34 @@ function loadCourse(lang){
   CULTURE.length   = 0; CULTURE.push(...(c.culture || []));
   return c;
 }
-function courseLang(){ return (COURSES[S && S.lang] ? S.lang : 'de'); }
+/* ---- which courses are actually offered -------------------------------
+   Three courses are authored. One is shipped. That is a product decision,
+   not a technical one: a finished German course sells better than three
+   unfinished languages, and every parked pack stays compiled in, tested
+   and one line away from returning.
+
+   To ship Dutch: add 'nl' here. Nothing else changes.
+   To see a parked course without shipping it: open the app with ?langs=all
+   That is how tests/t-dutch.mjs and tests/t-mandarin.mjs reach them.       */
+const LIVE_LANGS = ['de'];
+function langPreview(){
+  try { return /(^|[?&])langs=all(&|$)/.test(location.search); } catch(e){ return false; }
+}
+function langLive(id){
+  return LIVE_LANGS.indexOf(id) >= 0 || (!!COURSES[id] && langPreview());
+}
+function courseLang(){
+  const l = S && S.lang;
+  return (COURSES[l] && langLive(l)) ? l : 'de';
+}
 function course(){ return COURSES[courseLang()] || COURSES.de; }
 function courseVoiceLang(){ return course().voice; }
 /* the greeting the learner sees on Home, in the language being learned */
+/* A course only offers a tab when it has the content behind it. Showing a
+   German exam inside the Dutch course is worse than showing no exam. */
+function hasMock(){ return !!(course().mock && course().exam); }
+function hasScenes(){ return SCENARIOS.length > 0; }
+function hasStories(){ return STORIES.length > 0; }
 function courseGreet(){
   const h = new Date().getHours(), g = course().greet || COURSES.de.greet;
   return h < 11 ? g[0] : h < 18 ? g[1] : g[2];

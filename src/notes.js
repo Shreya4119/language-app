@@ -50,7 +50,7 @@ function unitNotes(u){
       <div class="card" style="padding:6px 14px;margin-bottom:10px">
       ${words.map(v=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)">
         <div class="row" style="gap:8px">
-          <b style="flex:1;font-size:14px;min-width:0;color:${gender(v.de)||'var(--ink)'}">${esc(v.de)}</b>
+          <span style="flex:1;min-width:0"><b style="font-size:14px;color:${gender(v.de)||'var(--ink)'}">${esc(v.de)}</b>${pyLine(v)}</span>
           <span style="flex:1;font-size:12px;color:var(--muted);text-align:right">${esc(v.en)}</span>
         </div>
         ${v.ex ? `<div style="font-size:11.5px;color:var(--muted);font-style:italic;margin-top:2px">${esc(v.ex)}</div>` : ''}
@@ -131,7 +131,7 @@ function revisionCard(){
       <div style="min-width:64px">${avatarSVG((S.langPicked||S.onboarded)?'de':'neutral','warm',64)}</div>
       <div class="grow" style="min-width:0">
         <b style="font-family:var(--font-head);font-size:15px">Welcome back. First, a quick revision.</b>
-        <div class="usub" style="margin-top:4px;line-height:1.5">Last time you finished <b>${us.length} unit${us.length===1?'':'s'}</b>: ${esc(names)}${us.length>3?', and more':''}. Zree minutes now and zey stay. Skip it and half of it is gone by Friday.</div>
+        <div class="usub" style="margin-top:4px;line-height:1.5">${(typeof pickNudge==='function' && pickNudge()) || `Last time you finished <b>${us.length} unit${us.length===1?'':'s'}</b>: ${esc(names)}.`}</div>
       </div>
     </div>
     <div class="row" style="gap:8px;margin-top:10px">

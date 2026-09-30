@@ -39,17 +39,19 @@ SCREENS.milestone = () => {
 /* ================= MOCK TEST ================= */
 let MT = null;
 SCREENS.test = () => {
+  if(!hasMock()) return go('home');   /* no exam authored for this course */
+  const ex = course().exam;
   const best = S.mock.best;
   app.innerHTML = `<div class="screen">
- <h1 style="font-size:23px">Goethe A1 · Mock Test</h1>
- <p class="sub" style="margin-top:4px">Mirrors the real Start Deutsch 1: Hören, Lesen, Schreiben, Sprechen. 100 points, pass at 60.</p>
-    ${best!==null?`<div class="card" style="margin-top:12px"><div class="row"><span class="big" style="color:${best>=60?'var(--good)':'var(--warn)'}">${best}</span><div><b style="font-size:14px">${best>=60?'BESTANDEN · passed this mock':'Best so far'}</b><div class="usub">/ 100 points · pass ≥ 60</div></div></div>
+ <h1 style="font-size:23px">${esc(ex.name)} · Mock Test</h1>
+ <p class="sub" style="margin-top:4px">Mirrors the real ${esc(ex.real)}: ${ex.modules.map(m=>esc(m[0])).join(', ')}. 100 points, pass at ${ex.pass}.</p>
+    ${best!==null?`<div class="card" style="margin-top:12px"><div class="row"><span class="big" style="color:${best>=ex.pass?'var(--good)':'var(--warn)'}">${best}</span><div><b style="font-size:14px">${best>=ex.pass?'Passed this mock':'Best so far'}</b><div class="usub">/ 100 points · pass ≥ ${ex.pass}</div></div></div>
       ${S.mock.modules?`<div style="margin-top:8px">${Object.entries(S.mock.modules).map(([k,v])=>`<div class="row" style="margin-top:5px"><span style="width:86px;font-size:12.5px;font-weight:600;text-transform:capitalize">${k}</span><div class="progress"><i style="width:${v/25*100}%"></i></div><span style="font-size:12px;font-weight:700;width:42px;text-align:right">${v}/25</span></div>`).join('')}</div>`:''}</div>`:''}
  <div class="sec">The four modules</div>
  <div class="card" style="padding:8px 14px">
-      ${[['Hören','~20 min','pictures, true/false, key details'],['Lesen','25 min','signs, notices, short texts'],['Schreiben','20 min','form + 30-40-word message'],['Sprechen','15 min','introduce yourself, Q&A, requests']].map(([n,t,d])=>`<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><b style="font-size:13.5px;width:86px">${n}</b><span class="usub grow">${d}</span><span style="font-size:11.5px;font-weight:700;color:var(--muted)">${t}</span></div>`).join('')}
+      ${ex.modules.map(([n,t,d])=>`<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><b style="font-size:13.5px;width:86px">${n}</b><span class="usub grow">${d}</span><span style="font-size:11.5px;font-weight:700;color:var(--muted)">${t}</span></div>`).join('')}
 </div>
- <p class="sub" style="font-size:12.5px;margin-top:10px">This mini-mock uses only official Wortliste vocabulary. Real exam: not modular at A1, all four parts in one sitting.</p>
+ <p class="sub" style="font-size:12.5px;margin-top:10px">This mini-mock uses only vocabulary the course has taught. The real exam is not modular at A1: all four parts in one sitting.</p>
  <div class="grow" style="min-height:12px"></div>
  <button class="btn" onclick="mtStart()">${best===null?'Start the mock test':'Retake the test'}</button>
   ${navBar('test')}</div>`;
@@ -195,7 +197,7 @@ SCREENS.me = () => {
  <button class="btn sec2" onclick="logout()">Log out</button>
 </div>
  <div class="sec">About</div>
- <div class="card"><p style="font-size:12.5px;line-height:1.6;color:var(--muted)">Sprak v1 · German A1 · vocabulary sourced from the official Goethe A1 Wortliste. <span style="text-decoration:underline;cursor:pointer" onclick="if(confirm('Reset progress but keep your name and settings?')){S.units={};S.words={};S.scenarios={};S.stories={};S.mock={best:null,modules:null};save();go('home')}">Reset progress only</span></p></div>
+ <div class="card"><p style="font-size:12.5px;line-height:1.6;color:var(--muted)">Sprak v1 · ${esc(course().native)} A1 · ${esc(course().source || '')}. <span style="text-decoration:underline;cursor:pointer" onclick="if(confirm('Reset progress but keep your name and settings?')){S.units={};S.words={};S.scenarios={};S.stories={};S.mock={best:null,modules:null};save();go('home')}">Reset progress only</span></p></div>
   ${navBar('me')}</div>`;
   renderVoices();
 };
@@ -232,8 +234,8 @@ function logoutConfirm(){
 function setTheme(id){ S.theme=id; save(); app.dataset.theme=id; go('me'); toast('Theme: '+id+' ✓'); }
 function renderVoices(){
   const box = document.getElementById('voiceBox'); if(!box) return;
-  const list = germanVoices();
-  if(!list.length){ box.innerHTML = `<p class="usub" style="font-size:12.5px;line-height:1.5">No German voice found on this device yet. Tap anywhere and reopen this screen, some browsers load voices only after you interact. Chrome usually offers <b>Google Deutsch</b>.</p>`; return; }
+  const list = targetVoices();
+  if(!list.length){ box.innerHTML = `<p class="usub" style="font-size:12.5px;line-height:1.5">No ${esc(course().native)} voice found on this device yet. Tap anywhere and reopen this screen, some browsers load voices only after you interact. On Android, install one under Settings, Language and input, Text-to-speech.</p>`; return; }
   box.innerHTML = list.map(v=>{
     const on = deVoice && deVoice.name === v.name;
     return `<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)">
@@ -242,7 +244,7 @@ function renderVoices(){
  <button class="ico" onclick="speak(TT().hello)" title="test">🔊</button>
  <button class="chip" style="padding:6px 11px;font-size:12px;${on?'border-color:var(--accent);background:var(--tint)':''}" onclick="chooseVoice('${esc(v.name).replace(/'/g,"\\'")}')">${on?'✓ In use':'Use'}</button>
 </div>`;
-  }).join('') + `<p class="usub" style="font-size:11.5px;margin-top:9px;line-height:1.45">${TN()} speaks German with this voice, and her English explanations too, which is where her accent comes from. Voices differ per browser; Chrome's <b>Google Deutsch</b> is the default choice.</p>`;
+  }).join('') + `<p class="usub" style="font-size:11.5px;margin-top:9px;line-height:1.45">${TN()} speaks ${esc(course().native)} with this voice, and her English explanations too. Voices differ per browser, and only ${esc(course().native)} voices are listed: the app never reads one language with another language's voice.</p>`;
 }
 function chooseVoice(name){
   S.voiceName = name; save(); pickVoice();
@@ -274,8 +276,8 @@ SCREENS.progress = () => {
  <div class="sec">Your marks</div>
  <div class="card">
       ${avg!==null ? `<div class="row"><div class="grow"><b style="font-size:13.5px">Average lesson check</b><div class="usub">${checks.length} check${checks.length===1?'':'s'} taken</div></div>${gradeBadge(avg)}</div>`
-        : '<p class="usub" style="font-size:12.5px">No checks taken yet, finish a lesson and Klara will mark it.</p>'}
- <p class="usub" style="font-size:11px;margin-top:10px;line-height:1.5">Marked the German way: <b>1 sehr gut</b> · 2 gut · 3 befriedigend · 4 ausreichend · 5 mangelhaft, <b>6 ungenügend</b>. A check counts as passed from 70%.</p>
+        : '<p class="usub" style="font-size:12.5px">No checks taken yet, finish a lesson and ${TN()} will mark it.</p>'}
+ <p class="usub" style="font-size:11px;margin-top:10px;line-height:1.5">${(course().grades||{}).legend || ''} A check counts as passed from 70%.</p>
 </div>
  <div class="sec">This week</div>
  <div class="card">${weekStrip()}<p class="usub" style="font-size:11px;margin-top:9px">Practised ${(S.days||[]).length} day${(S.days||[]).length===1?'':'s'} in the last 30.</p></div>
@@ -294,7 +296,7 @@ SCREENS.vocab = () => {
 </div>
  <div class="card" style="padding:6px 14px">
       ${list.length? list.sort((a,b)=>S.words[a].lv-S.words[b].lv).map(id=>{const v=VOCAB[id],w=S.words[id];return `<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)">
- <div class="grow"><b style="font-size:13.5px">${esc(v.de)}</b><div class="usub">${esc(v.en)}</div></div>
+ <div class="grow"><b style="font-size:13.5px">${esc(v.de)}</b>${pyLine(v)}<div class="usub">${esc(v.en)}</div></div>
         ${sayIt(v.de, {en:v.en})}</div>`;}).join('') : '<p class="sub center" style="padding:20px">Nothing here yet, go learn!</p>'}
 </div>
   ${navBar('me')}</div>`;
@@ -311,16 +313,16 @@ function expObsidian(){
   if(!seen.length) return toast('No words yet!');
   const slug = course().slug;
   let md = `---\ntags: [sprak, ${slug}, vocabulary]\ncluster: ${slug}\nexported: ${today()}\n---\n\n# My Sprak Words 🃏\n\nCompatible with the Obsidian Spaced Repetition plugin.\n\n#flashcards/${slug}/sprak\n\n`;
-  seen.forEach(id=>{ const v=VOCAB[id], w=S.words[id]; md += `${v.de}::${v.en}\n`; });
+  seen.forEach(id=>{ const v=VOCAB[id], w=S.words[id]; md += `${v.de}${v.py?' ('+v.py+')':''}::${v.en}\n`; });
   md += `\n## Mastery snapshot\n\n| Word | English | Mastery |\n|---|---|---|\n`;
-  seen.forEach(id=>{ const v=VOCAB[id], w=S.words[id]; md += `| ${v.de} | ${v.en} | ${M_LABEL[w.lv]} |\n`; });
+  seen.forEach(id=>{ const v=VOCAB[id], w=S.words[id]; md += `| ${v.de}${v.py?' ('+v.py+')':''} | ${v.en} | ${M_LABEL[w.lv]} |\n`; });
   dl(`Sprak ${course().native} Words.md`, md, 'text/markdown'); toast('Obsidian note downloaded ✓');
 }
 function expCsv(kind){
   const seen = Object.keys(S.words).filter(id=>S.words[id].seen>0 && VOCAB[id]);
   if(!seen.length) return toast('No words yet!');
   if(kind==='anki'){
-    let t = seen.map(id=>{const v=VOCAB[id];return `${v.de}\t${v.en}${v.ex?'<br><i>'+v.ex[0]+'</i>':''}`;}).join('\n');
+    let t = seen.map(id=>{const v=VOCAB[id];return `${v.de}${v.py?'<br>'+v.py:''}\t${v.en}${v.ex?'<br><i>'+v.ex[0]+'</i>':''}`;}).join('\n');
     dl('sprak-anki.txt', t); toast('Anki import file downloaded ✓ (File → Import, tab-separated)');
   } else {
     let t = course().slug + ',english,mastery,misses\n' + seen.map(id=>{const v=VOCAB[id],w=S.words[id];return `"${v.de}","${v.en}",${M_LABEL[w.lv]},${w.miss}`;}).join('\n');
@@ -329,6 +331,11 @@ function expCsv(kind){
 }
 
 /* ================= INIT ================= */
+/* Someone who was learning Dutch when Dutch was parked opens German instead.
+   Nothing of theirs is deleted: S.units and S.words are keyed by id and stay
+   exactly as they were, so the day the pack ships again they carry on from
+   where they stopped. parkedLang remembers which one to offer them back. */
+if(S.lang && !langLive(S.lang)){ S.parkedLang = S.lang; S.lang = 'de'; save(); }
 loadCourse(S.lang || 'de');   /* before the first render: every screen reads UNITS */
 pickVoice();
 app.dataset.theme = S.theme || 'sunny';

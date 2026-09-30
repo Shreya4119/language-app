@@ -32,6 +32,7 @@ function tchWords(ids, lines){
     ${ws.map(v=>`<div class="row" style="gap:9px;padding:8px 0;border-top:1px solid var(--line)">
       <button class="ico" style="width:34px;height:34px;min-width:34px;font-size:13px" onclick="speak(this.dataset.de)" data-de="${esc(v.de)}" title="listen">🔊</button>
       <span style="flex:1;min-width:0"><b style="font-size:14.5px;color:${gender(v.de)}">${esc(v.de)}</b>
+        ${pyLine(v)}
         <div class="usub" style="font-size:11.5px">${esc(v.en)}</div></span>
     </div>`).join('')}
   </div>`;
@@ -157,6 +158,10 @@ function tchNext(){
 }
 function tchFinish(){
   const u = UNITS.find(x=>x.id===TCH.uid);
+  /* A unit can declare that its practice is a real activity rather than
+     multiple choice: building your own introduction and saying it out loud
+     teaches more than picking option B. */
+  if(u.practice === 'intro' || u.practice === 'alphabet') return startLesson1(u.id, u.practice);
   const L = buildLesson(u);
   SES = {kind:'lesson', uid:u.id, items:L.items, i:0, results:[], title:u.title, intro:null};
   go('session');

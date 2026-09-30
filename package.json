@@ -6,6 +6,7 @@
   "description": "German and Dutch A1 for people who have just moved country.",
   "scripts": {
     "dev": "vite",
+    "dev:https": "cross-env SPRAK_HTTPS=1 vite",
     "build": "vite build",
     "preview": "vite preview",
     "test": "npm run test:unit && npm run test:e2e",
@@ -15,9 +16,11 @@
     "single": "node scripts/build-single.mjs"
   },
   "devDependencies": {
-    "vite": "^5.4.0",
-    "vitest": "^2.1.0",
+    "@vitejs/plugin-basic-ssl": "^1.2.0",
+    "cross-env": "^10.1.0",
     "playwright": "^1.47.0",
-    "start-server-and-test": "^2.0.0"
+    "start-server-and-test": "^2.0.0",
+    "vite": "^5.4.0",
+    "vitest": "^2.1.0"
   }
 }

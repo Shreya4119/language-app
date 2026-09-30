@@ -33,3 +33,5 @@ Why things are the way they are. Append, do not rewrite.
 **Colours moved out of the foundation stage.** Nobody's first week in a new country fails for lack of "brown". They now sit in Stage 1 attached to nouns inside a frame.
 
 **Third-party syllabi are studied, never copied.** Structure, sequencing and teaching method are ideas and fair to learn from. Lesson text, exercises and word lists are someone's product. Anything commercial stays on the reference shelf tagged `licence: commercial — link only`; Goethe's A1 Wortliste is canonical for what we actually teach.
+
+**One language ships, two are parked.** Dutch Stage 0 (9 units, 174 words) and the Mandarin proof (3 units) are finished work, tested and compiled in, but `LIVE_LANGS = ['de']` and no learner can reach them. A store listing that offers three languages and delivers two half-courses reads as abandoned; one finished A1 course reads as a product. The packs stay in the build rather than being stripped out precisely so they cannot rot: five suites exercise them through `?langs=all` on every single build. Cost of keeping them: about 37KB gzipped of a 118KB bundle. Reversing it is one array.

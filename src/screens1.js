@@ -96,7 +96,7 @@ SCREENS.home = () => {
       return `<div class="card" style="margin-top:10px;cursor:pointer${pend?';border-color:var(--hi)':''}" onclick="go('notebook')">
         <div class="row"><span style="font-size:20px">✎</span><div class="grow"><b style="font-size:13.5px">My notes</b>
         <div class="usub">Grammar, culture and every word from your ${dn} finished lesson${dn===1?'':'s'}</div>
-        ${pend?`<div style="font-size:12px;color:var(--accent);font-weight:700;margin-top:3px">${pend} still to copy out by hand</div>`:''}</div>
+        ${pend?`<div style="font-size:12px;color:var(--accent);font-weight:700;margin-top:3px">${esc((typeof pickNudge==='function' && pickNudge('hand')) || (pend+' still to copy out by hand'))}</div>`:''}</div>
         <span style="color:var(--accent);font-weight:800">→</span></div></div>`; })()}
   ${navBar('home')}</div>`;
 };
@@ -147,7 +147,7 @@ SCREENS.unit = (uid) => {
       <div class="card" style="margin-bottom:10px;background:var(--tint);border:none"><div class="gbody">${u.culture.body}</div></div>`:''}
     <div class="sec">Vocabulary in this unit</div>
     <div class="card" style="padding:8px 14px">
-      ${words.slice(0,6).map(id=>{const v=VOCAB[id],w=S.words[id];return `<div class="row" style="padding:7px 0;border-bottom:1px solid var(--line)"><b style="font-size:14px">${esc(v.de)}</b><span class="grow usub">${esc(v.en)}</span><span class="mastery ${w?M_CLASS[w.lv]:'m-new'}">${w?M_LABEL[w.lv]:'new'}</span></div>`;}).join('')}
+      ${words.slice(0,6).map(id=>{const v=VOCAB[id],w=S.words[id];return `<div class="row" style="padding:7px 0;border-bottom:1px solid var(--line)"><span style="min-width:0"><b style="font-size:14px">${esc(v.de)}</b>${pyLine(v)}</span><span class="grow usub" style="margin-left:8px">${esc(v.en)}</span><span class="mastery ${w?M_CLASS[w.lv]:'m-new'}">${w?M_LABEL[w.lv]:'new'}</span></div>`;}).join('')}
       ${words.length>6?`<div class="usub center" style="padding:8px 0">+ ${words.length-6} more</div>`:''}
     </div>
     <div class="grow" style="min-height:14px"></div>

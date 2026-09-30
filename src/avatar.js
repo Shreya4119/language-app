@@ -5,6 +5,8 @@ const TEACHERS = {
        blurb:'I teach German the way I wish somebody had taught me: from ze fundamentals, out loud, and always with ze reason behind ze rule.'},
   fr: {name:'Marie', lang:'French', hello:'Bienvenue! Je m\'appelle Marie.', blurb:'Coming soon.'},
   es: {name:'Lucía', lang:'Spanish', hello:'¡Bienvenido! Me llamo Lucía.', blurb:'Coming soon.'},
+  zh: (typeof LIN !== 'undefined' && LIN) ? LIN
+      : {name:'Lin', lang:'Mandarin', hello:'你好！我叫林。', blurb:'Coming soon.'},
   nl: (typeof SANNE !== 'undefined' && SANNE) ? SANNE
       : {name:'Sanne', lang:'Dutch', hello:'Hallo! Ik heet Sanne.', blurb:'Coming soon.'}
 };
@@ -127,17 +129,23 @@ function teacherBox(text, opts){
 /* One entry point for choosing a language: swap the course pack, then the
    voice, then go. The order matters: pickVoice() reads the loaded course. */
 function pickLang(id){
+  /* a parked language is not selectable, however the call arrives */
+  if(!langLive(id)) return;
   S.lang = id; S.langPicked = true; save();
   loadCourse(id);
   pickVoice();
   go('meetTeacher');
 }
 SCREENS.onboard1 = () => {
+  /* The fourth column is what the row says when the course is NOT live.
+     Whether it is live is langLive(), never a hard-coded true. */
   const langs = [
-    ['de','German','Deutsch · full A1 course', true, ['#111','#DE1017','#FFCC00']],
-    ['fr','French','Français · coming soon', false, ['#0055A4','#fff','#EF4135']],
-    ['es','Spanish','Español · coming soon', false, ['#AA151B','#F1BF00','#AA151B']],
-    ['nl','Dutch','Nederlands · Stage 0 ready', true, ['#AE1C28','#fff','#21468B']]];
+    ['de','German','Deutsch · full A1 course', 'Deutsch', ['#111','#DE1017','#FFCC00']],
+    ['nl','Dutch','Nederlands · Stage 0 ready', 'Nederlands', ['#AE1C28','#fff','#21468B']],
+    ['fr','French','Français', 'Français', ['#0055A4','#fff','#EF4135']],
+    ['es','Spanish','Español', 'Español', ['#AA151B','#F1BF00','#AA151B']],
+    ['zh','Mandarin','中文 · tones, introduction, numbers', '中文', ['#DE2910','#DE2910','#FFDE00']]]
+    .map(([id,n,s,soon,f]) => [id, n, langLive(id) ? s : soon, langLive(id), f]);
   app.innerHTML = `<div class="screen noNav">
  <div style="margin-bottom:26px">${sprakWordmark()}</div>
  <h1>Which language are you learning?</h1>
